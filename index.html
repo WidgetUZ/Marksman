@@ -103,7 +103,7 @@
   <div class="container">
     <!-- Kolumna A -->
     <div class="column-a">
-      <img id="target-image" src="img/budynek_300.jpg" alt="Podaj odległość do okna">
+      <img id="target-image" src="img/basic/image1_200.jpg" alt="żołnierza">
     </div>
     <!-- Kolumna B -->
     <div class="column-b">
@@ -130,24 +130,37 @@
       const submitBtn = document.getElementById("submit-btn");
       const result = document.getElementById("result");
 
-      // Zasoby obrazków
-      const images = {
-        basic: ["basic/image1_200.jpg", "basic/image2_300.jpg"],
-        medium: ["medium/image1_400.jpg", "medium/image2_500.jpg"],
-        advanced: ["advanced/image1_600.jpg", "advanced/image2_700.jpg"]
+      // Foldery obrazków
+      const imageFolders = {
+        basic: "img/basic/",
+        medium: "img/medium/",
+        advanced: "img/advanced/"
       };
 
+      // Funkcja pobierająca listę obrazków
+      async function fetchImageList(folder) {
+        // Symulowana lista obrazków dla każdego folderu
+        const images = {
+          basic: ["image1_200.jpg", "image2_300.jpg"],
+          medium: ["image1_400.jpg", "image2_500.jpg"],
+          advanced: ["image1_600.jpg", "image2_700.jpg"]
+        };
+        return images[folder];
+      }
+
       // Funkcja losująca obrazek
-      function getRandomImage(level) {
-        const imgs = images[level];
-        return imgs[Math.floor(Math.random() * imgs.length)];
+      async function getRandomImage(level) {
+        const images = await fetchImageList(level);
+        const randomIndex = Math.floor(Math.random() * images.length);
+        return imageFolders[level] + images[randomIndex];
       }
 
       // Wczytaj nowy obrazek
-      function loadImage(level) {
-        const imgPath = getRandomImage(level);
+      async function loadImage(level) {
+        const imgPath = await getRandomImage(level);
         targetImage.src = imgPath;
-        const altText = targetImage.alt; // Pobiera tekst alternatywny
+        const altText = imgPath.split("_")[0].split("/").pop(); // Pobiera alt z nazwy pliku
+        targetImage.alt = altText;
         instruction.textContent = `Podaj odległość do ${altText}:`;
       }
 
