@@ -11,74 +11,57 @@
       background-color: #f9f9f9;
       color: #333;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
-      height: 100vh;
+      padding: 20px;
     }
     .container {
       display: flex;
-      width: 90%;
-      max-width: 1200px;
-      height: 600px;
+      flex-wrap: wrap;
+      justify-content: center;
       gap: 20px;
+      max-width: 1200px;
+      width: 100%;
     }
-    .column {
-      flex: 1;
+    .column-a, .column-b {
       border: 1px solid #ddd;
       border-radius: 10px;
-      overflow: hidden;
-      position: relative;
+      background-color: #fff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
     .column-a {
-      background-color: #fff;
+      width: 900px;
+      height: 900px;
+      position: relative;
       display: flex;
       justify-content: center;
       align-items: center;
     }
-    .image-container {
-      position: relative;
+    .column-a img {
       width: 100%;
       height: 100%;
-    }
-    .mildot {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 10;
-    }
-    .target {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 5;
+      object-fit: cover;
     }
     .column-b {
-      background-color: #f0f0f0;
+      width: 100%;
+      max-width: 900px;
       padding: 20px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
     h1, h2 {
       font-size: 18px;
       margin-bottom: 10px;
     }
-    input[type="number"] {
+    select, input[type="number"], button {
       width: 100%;
       padding: 10px;
-      margin-top: 10px;
+      margin: 10px 0;
       border: 1px solid #ccc;
       border-radius: 5px;
+      font-size: 16px;
     }
     button {
-      margin-top: 10px;
-      padding: 10px 20px;
-      border: none;
       background-color: #007aff;
       color: #fff;
-      border-radius: 5px;
       cursor: pointer;
     }
     button:hover {
@@ -89,70 +72,80 @@
       font-weight: bold;
       color: #007aff;
     }
+    @media (max-width: 900px) {
+      .container {
+        flex-direction: column;
+      }
+      .column-a {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1 / 1;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <!-- Kolumna A -->
-    <div class="column column-a">
-      <div class="image-container">
-        <img src="mildot.png" alt="Siatka Mildot" class="mildot">
-        <img src="image1.png" alt="Obiekt do mierzenia" class="target">
-      </div>
+    <div class="column-a">
+      <img id="target-image" src="basic/image1_200.jpg" alt="żołnierza">
     </div>
     <!-- Kolumna B -->
-    <div class="column column-b">
-      <h1>Wybierz poziom trudności</h1>
-      <form id="difficulty-form">
-        <label>
-          <input type="radio" name="difficulty" value="basic" checked>
-          Podstawowy
-        </label>
-        <label>
-          <input type="radio" name="difficulty" value="medium">
-          Średni
-        </label>
-        <label>
-          <input type="radio" name="difficulty" value="advanced">
-          Zaawansowany
-        </label>
-      </form>
-      <h2>Podaj odległość:</h2>
+    <div class="column-b">
+      <h1>Symulator oceny odległości</h1>
+      <label for="difficulty">Wybierz poziom trudności:</label>
+      <select id="difficulty">
+        <option value="basic">Podstawowy</option>
+        <option value="medium">Średni</option>
+        <option value="advanced">Zaawansowany</option>
+      </select>
+      <h2 id="instruction">Podaj odległość do żołnierza:</h2>
       <input type="number" id="distance-input" placeholder="Wpisz odległość w metrach">
       <button id="submit-btn">Zatwierdź</button>
       <p id="result"></p>
     </div>
   </div>
+
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      const form = document.getElementById("difficulty-form");
-      const input = document.getElementById("distance-input");
-      const result = document.getElementById("result");
+      const difficultySelect = document.getElementById("difficulty");
+      const targetImage = document.getElementById("target-image");
+      const instruction = document.getElementById("instruction");
+      const distanceInput = document.getElementById("distance-input");
       const submitBtn = document.getElementById("submit-btn");
-      const targetImage = document.querySelector(".target");
+      const result = document.getElementById("result");
 
+      // Zasoby obrazków
       const images = {
-        basic: ["image1.png", "image2.png"],
-        medium: ["image3.png", "image4.png"],
-        advanced: ["image5.png", "image6.png"]
+        basic: ["basic/image1_200.jpg", "basic/image2_300.jpg"],
+        medium: ["medium/image1_400.jpg", "medium/image2_500.jpg"],
+        advanced: ["advanced/image1_600.jpg", "advanced/image2_700.jpg"]
       };
 
+      // Funkcja losująca obrazek
       function getRandomImage(level) {
         const imgs = images[level];
         return imgs[Math.floor(Math.random() * imgs.length)];
       }
 
+      // Wczytaj nowy obrazek
       function loadImage(level) {
-        targetImage.src = getRandomImage(level);
+        const imgPath = getRandomImage(level);
+        targetImage.src = imgPath;
+        const altText = targetImage.alt; // Pobiera tekst alternatywny
+        instruction.textContent = `Podaj odległość do ${altText}:`;
       }
 
-      form.addEventListener("change", (e) => {
-        loadImage(e.target.value);
+      // Zmiana poziomu trudności
+      difficultySelect.addEventListener("change", () => {
+        const level = difficultySelect.value;
+        loadImage(level);
       });
 
+      // Obsługa przycisku zatwierdzenia
       submitBtn.addEventListener("click", () => {
-        const userDistance = parseInt(input.value, 10);
-        const correctDistance = 500; // Placeholder value
+        const userDistance = parseInt(distanceInput.value, 10);
+        const correctDistance = parseInt(targetImage.src.split("_")[1]); // Pobiera wartość z nazwy pliku
         const diff = Math.abs(correctDistance - userDistance);
 
         if (diff < 50) {
@@ -164,7 +157,7 @@
         }
       });
 
-      // Initialize with basic difficulty
+      // Inicjalizacja z domyślnym poziomem trudności
       loadImage("basic");
     });
   </script>
