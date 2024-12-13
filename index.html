@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Symulator oceny odległości</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "SF Mono", "Menlo", "Monaco", "Consolas", monospace;
+      background-color: #f9f9f9;
+      color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      display: flex;
+      width: 90%;
+      max-width: 1200px;
+      height: 600px;
+      gap: 20px;
+    }
+    .column {
+      flex: 1;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+    }
+    .column-a {
+      background-color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .image-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+    .mildot {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10;
+    }
+    .target {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 5;
+    }
+    .column-b {
+      background-color: #f0f0f0;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    h1, h2 {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+    input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      border: none;
+      background-color: #007aff;
+      color: #fff;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #005bb5;
+    }
+    #result {
+      margin-top: 10px;
+      font-weight: bold;
+      color: #007aff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Kolumna A -->
+    <div class="column column-a">
+      <div class="image-container">
+        <img src="mildot.png" alt="Siatka Mildot" class="mildot">
+        <img src="image1.png" alt="Obiekt do mierzenia" class="target">
+      </div>
+    </div>
+    <!-- Kolumna B -->
+    <div class="column column-b">
+      <h1>Wybierz poziom trudności</h1>
+      <form id="difficulty-form">
+        <label>
+          <input type="radio" name="difficulty" value="basic" checked>
+          Podstawowy
+        </label>
+        <label>
+          <input type="radio" name="difficulty" value="medium">
+          Średni
+        </label>
+        <label>
+          <input type="radio" name="difficulty" value="advanced">
+          Zaawansowany
+        </label>
+      </form>
+      <h2>Podaj odległość:</h2>
+      <input type="number" id="distance-input" placeholder="Wpisz odległość w metrach">
+      <button id="submit-btn">Zatwierdź</button>
+      <p id="result"></p>
+    </div>
+  </div>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("difficulty-form");
+      const input = document.getElementById("distance-input");
+      const result = document.getElementById("result");
+      const submitBtn = document.getElementById("submit-btn");
+      const targetImage = document.querySelector(".target");
+
+      const images = {
+        basic: ["image1.png", "image2.png"],
+        medium: ["image3.png", "image4.png"],
+        advanced: ["image5.png", "image6.png"]
+      };
+
+      function getRandomImage(level) {
+        const imgs = images[level];
+        return imgs[Math.floor(Math.random() * imgs.length)];
+      }
+
+      function loadImage(level) {
+        targetImage.src = getRandomImage(level);
+      }
+
+      form.addEventListener("change", (e) => {
+        loadImage(e.target.value);
+      });
+
+      submitBtn.addEventListener("click", () => {
+        const userDistance = parseInt(input.value, 10);
+        const correctDistance = 500; // Placeholder value
+        const diff = Math.abs(correctDistance - userDistance);
+
+        if (diff < 50) {
+          result.textContent = "Doskonała ocena!";
+        } else if (diff < 100) {
+          result.textContent = "Dobra ocena!";
+        } else {
+          result.textContent = "Słaba ocena, spróbuj ponownie.";
+        }
+      });
+
+      // Initialize with basic difficulty
+      loadImage("basic");
+    });
+  </script>
+</body>
+</html>
