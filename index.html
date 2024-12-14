@@ -240,8 +240,8 @@ nextImageButton.addEventListener("click", () => {
     submitDistanceButton.addEventListener("click", () => {
       const userDistance = parseInt(distanceInput.value, 10);
       resultMessage.textContent = userDistance === correctDistance
-        ? "Gratulacje! Trafiłeś."
-        : `Niepoprawne. Prawidłowa odległość to ${correctDistance} metrów.`;
+        ? "Gratulacje!."
+        : `Źle. Prawidłowa odległość to ${correctDistance} metrów.`;
       distanceInput.value = "";
     });
 
