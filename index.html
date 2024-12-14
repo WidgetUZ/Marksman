@@ -29,35 +29,52 @@
       max-width: 1200px;
       width: 100%;
       gap: 20px;
-      justify-content: space-between;
+      justify-content: center;
     }
 
     .column-a {
-      flex: 1 1 50%; /* Skaluje się dynamicznie */
-      max-width: 600px;
+      position: relative;
+      flex-shrink: 0;
+      flex-grow: 1;
+      max-width: 900px;
+      max-height: 900px;
+      width: 100%;
       aspect-ratio: 1; /* Proporcje 1:1 */
       background-color: #2d2d2d;
       border: 2px solid #3c3c3c;
       display: flex;
       justify-content: center;
       align-items: center;
-      position: relative;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
     }
 
     .column-a img {
+      position: absolute;
       max-width: 100%;
       max-height: 100%;
       object-fit: contain;
     }
 
+    .mildot-overlay {
+      display: none; /* Ukryj na początku */
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 9999; /* Priorytet */
+      pointer-events: none;
+    }
+
     .column-b {
-      flex: 1 1 40%; /* Mniejsza kolumna */
+      max-width: 900px;
+      width: 100%;
       padding: 20px;
       background-color: #2d2d2d;
       border: 2px solid #3c3c3c;
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+      flex-grow: 1;
     }
 
     .form-group {
@@ -78,6 +95,12 @@
       box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
     }
 
+    select:focus, input[type="number"]:focus {
+      outline: none;
+      border-color: #61dafb;
+      box-shadow: 0 0 5px #61dafb;
+    }
+
     button {
       padding: 10px 20px;
       font-size: 16px;
@@ -96,6 +119,7 @@
     #result-message {
       margin-top: 20px;
       font-size: 16px;
+      color: #d4d4d4;
       text-align: center;
     }
 
@@ -103,17 +127,28 @@
       .container {
         flex-direction: column;
       }
+
+      .column-a {
+        order: -1; /* Kolumna A wyżej na mobilkach */
+        width: 100%;
+      }
+
+      .column-b {
+        width: 100%;
+      }
     }
   </style>
 </head>
 <body>
   <h1>MilDot Master</h1>
   <div class="container">
-    <div class="column-a">
-      <img class="mildot-overlay" src="img/siatka-mildot.png" alt="Siatka Mildot">
+    <!-- Kolumna A -->
+    <div class="column column-a">
+      <img id="mildot-overlay" class="mildot-overlay" src="img/siatka-mildot.png" alt="Siatka Mildot">
       <img id="image-display" src="img/logo.jpg" alt="Logo">
     </div>
-    <div class="column-b">
+    <!-- Kolumna B -->
+    <div class="column column-b">
       <div class="form-group">
         <label for="difficulty-select">Wybierz poziom trudności:</label>
         <select id="difficulty-select">
@@ -131,78 +166,62 @@
       <p id="result-message">Podaj odległość...</p>
     </div>
   </div>
-
   <script>
-    const imageDisplay = document.getElementById("image-display");
-    const difficultySelect = document.getElementById("difficulty-select");
-    const distanceInput = document.getElementById("distance-input");
-    const resultMessage = document.getElementById("result-message");
-    const submitDistanceButton = document.getElementById("submit-distance");
+    const imageDisplay = document.getElementById('image-display');
+    const mildotOverlay = document.getElementById('mildot-overlay');
+    const difficultySelect = document.getElementById('difficulty-select');
+    const distanceInput = document.getElementById('distance-input');
+    const resultMessage = document.getElementById('result-message');
+    const submitDistanceButton = document.getElementById('submit-distance');
 
     const imageFolders = {
       basic: "img/basic/",
       medium: "img/medium/",
-      advanced: "img/advanced/",
+      advanced: "img/advanced/"
     };
 
-    let imageList = {}; 
+    let imageList = {};
+    let currentImage = "logo.jpg";
     let correctDistance = 0;
 
-    // Pobranie listy obrazków
     async function fetchImageList() {
       try {
         const response = await fetch("image-list.json");
-        if (!response.ok) throw new Error("Błąd pobierania obrazków");
+        if (!response.ok) throw new Error("Błąd w pobieraniu pliku JSON");
         imageList = await response.json();
       } catch (error) {
         console.error("Błąd:", error);
       }
     }
 
-    // Funkcja losująca obrazek
-    function loadImage(level) {
+    function getRandomImage(level) {
       const images = imageList[level];
       if (!images || images.length === 0) return "logo.jpg";
-      const randomImage = images[Math.floor(Math.random() * images.length)];
-      const [_, distance] = randomImage.split("_");
-      correctDistance = parseInt(distance.split(".")[0], 10);
-      return randomImage;
+      return images[Math.floor(Math.random() * images.length)];
     }
 
-    // Obsługa zmiany poziomu trudności
     difficultySelect.addEventListener("change", () => {
-      const selectedLevel = difficultySelect.value;
-      const randomImage = loadImage(selectedLevel);
-      imageDisplay.src = imageFolders[selectedLevel] + randomImage;
-      setTimeout(() => {
-        resultMessage.textContent = `Podaj odległość: ${correctDistance} m`;
-      }, 500);
-    });
-
-    // Obsługa zatwierdzenia odległości
-    submitDistanceButton.addEventListener("click", () => {
-      const userDistance = parseInt(distanceInput.value, 10);
-      if (!isNaN(userDistance)) {
-        const message =
-          userDistance === correctDistance
-            ? "Gratulacje! Trafiłeś."
-            : `Niepoprawne. Prawidłowa odległość to ${correctDistance} m.`;
-        resultMessage.textContent = message;
-
-        setTimeout(() => {
-          const selectedLevel = difficultySelect.value;
-          const randomImage = loadImage(selectedLevel);
-          imageDisplay.src = imageFolders[selectedLevel] + randomImage;
-        }, 2000);
-      } else {
-        resultMessage.textContent = "Wpisz prawidłową odległość.";
+      const level = difficultySelect.value;
+      if (level) {
+        const randomImage = getRandomImage(level);
+        currentImage = randomImage;
+        const [_, distance] = randomImage.split("_");
+        correctDistance = parseInt(distance, 10);
+        imageDisplay.src = imageFolders[level] + randomImage;
+        imageDisplay.alt = randomImage;
+        mildotOverlay.style.display = "block";
       }
     });
 
-    // Inicjalizacja
-    window.addEventListener("load", async () => {
-      await fetchImageList();
+    submitDistanceButton.addEventListener("click", () => {
+      const userDistance = parseInt(distanceInput.value, 10);
+      resultMessage.textContent = userDistance === correctDistance
+        ? "Gratulacje! Trafiłeś."
+        : `Niepoprawne. Prawidłowa odległość to ${correctDistance} metrów.`;
+      distanceInput.value = "";
     });
+
+    window.addEventListener("load", fetchImageList);
   </script>
 </body>
 </html>
