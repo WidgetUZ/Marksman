@@ -5,139 +5,137 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trening Snajperski</title>
   <style>
-  body {
-  font-family: "SF Mono", "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;
-  margin: 0;
-  padding: 0;
-  background-color: #1e1e1e;
-  color: #d4d4d4;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: 100vh;
-}
+    body {
+      font-family: "SF Mono", "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;
+      margin: 0;
+      padding: 0;
+      background-color: #1e1e1e;
+      color: #d4d4d4;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
 
-h1 {
-  color: #61dafb;
-  margin: 20px 0;
-  font-size: 2rem;
-}
+    h1 {
+      color: #61dafb;
+      margin: 20px 0;
+      font-size: 2rem;
+    }
 
-.container {
-  display: flex;
-  flex-wrap: wrap;
-  max-width: 1200px;
-  width: 100%;
-  gap: 20px;
-  justify-content: center;
-}
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      max-width: 1200px;
+      width: 100%;
+      gap: 20px;
+      justify-content: center;
+    }
 
-.column-a {
-  position: relative;
-  flex-shrink: 0;
-  flex-grow: 1;
-  max-width: 900px;
-  max-height: 900px;
-  width: 100%;
-  aspect-ratio: 1; /* Proporcje 1:1 */
-  background-color: #2d2d2d;
-  border: 2px solid #3c3c3c;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
-}
+    .column-a {
+      position: relative;
+      flex-shrink: 0;
+      flex-grow: 1;
+      max-width: 900px;
+      max-height: 900px;
+      width: 100%;
+      aspect-ratio: 1;
+      background-color: #2d2d2d;
+      border: 2px solid #3c3c3c;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+    }
 
-.column-a img {
-  position: absolute;
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-}
+    .column-a img {
+      position: absolute;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
 
-.mildot-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 9999; /* Priorytet */
-  pointer-events: none;
-}
+    .mildot-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 9999;
+      pointer-events: none;
+    }
 
-.column-b {
-  max-width: 900px;
-  width: 100%;
-  padding: 20px;
-  background-color: #2d2d2d;
-  border: 2px solid #3c3c3c;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
-  flex-grow: 1;
-}
+    .column-b {
+      max-width: 900px;
+      width: 100%;
+      padding: 20px;
+      background-color: #2d2d2d;
+      border: 2px solid #3c3c3c;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+      flex-grow: 1;
+    }
 
-.form-group {
-  margin-bottom: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
+    .form-group {
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
 
-select, input[type="number"] {
-  width: 100%;
-  padding: 10px;
-  font-size: 16px;
-  background-color: #1e1e1e;
-  border: 1px solid #3c3c3c;
-  border-radius: 5px;
-  color: #d4d4d4;
-  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
-}
+    select, input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      background-color: #1e1e1e;
+      border: 1px solid #3c3c3c;
+      border-radius: 5px;
+      color: #d4d4d4;
+      box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+    }
 
-select:focus, input[type="number"]:focus {
-  outline: none;
-  border-color: #61dafb;
-  box-shadow: 0 0 5px #61dafb;
-}
+    select:focus, input[type="number"]:focus {
+      outline: none;
+      border-color: #61dafb;
+      box-shadow: 0 0 5px #61dafb;
+    }
 
-button {
-  padding: 10px 20px;
-  font-size: 16px;
-  background-color: #61dafb;
-  color: #1e1e1e;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #61dafb;
+      color: #1e1e1e;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
 
-button:hover {
-  background-color: #42a5f5;
-}
+    button:hover {
+      background-color: #42a5f5;
+    }
 
-#result-message {
-  margin-top: 20px;
-  font-size: 16px;
-  color: #d4d4d4;
-  text-align: center;
-}
+    #result-message {
+      margin-top: 20px;
+      font-size: 16px;
+      color: #d4d4d4;
+      text-align: center;
+    }
 
-@media (max-width: 768px) {
-  .container {
-    flex-direction: column;
-  }
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
 
-  .column-a {
-    order: -1; /* Kolumna A wyżej na mobilkach */
-    width: 100%;
-  }
+      .column-a {
+        order: -1;
+        width: 100%;
+      }
 
-  .column-b {
-    width: 100%;
-  }
-}
-
-
+      .column-b {
+        width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
@@ -182,9 +180,8 @@ button:hover {
 
     let currentImage = "logo.jpg";
     let correctDistance = 0;
-    let imageList = {}; // Lista obrazków
+    let imageList = {};
 
-    // Funkcja pobierająca listę obrazków z pliku JSON
     async function fetchImageList() {
       try {
         const response = await fetch("image-list.json");
@@ -195,51 +192,50 @@ button:hover {
       }
     }
 
-    // Funkcja losująca obrazek z danego poziomu
     function getRandomImage(level) {
       const images = imageList[level];
-      if (!images || images.length === 0) {
-        console.error("Brak obrazków w poziomie:", level);
-        return "logo.jpg"; // Domyślny obrazek
-      }
+      if (!images || images.length === 0) return "logo.jpg";
       const randomIndex = Math.floor(Math.random() * images.length);
       return images[randomIndex];
     }
 
-    // Zmiana obrazka po wyborze poziomu trudności
-    difficultySelect.addEventListener("change", () => {
-      const selectedLevel = difficultySelect.value;
-      if (selectedLevel) {
-        const randomImage = getRandomImage(selectedLevel);
-        currentImage = randomImage;
-        const [_, distance] = randomImage.split("_"); // Wyciągnij odległość z nazwy pliku
-        correctDistance = parseInt(distance.split(".")[0], 10);
-        imageDisplay.src = imageFolders[selectedLevel] + randomImage;
-        imageDisplay.alt = randomImage.split("_")[0];
-        resultMessage.textContent = `Podaj odległość do ${imageDisplay.alt}...`;
-      }
-    });
+    function calculateMilDot(distance) {
+      return (distance / 1000).toFixed(2); 
+    }
 
-    // Obsługa zatwierdzania wpisanej odległości
+    function displayNextImage() {
+      setTimeout(() => {
+        const selectedLevel = difficultySelect.value;
+        if (selectedLevel) {
+          const randomImage = getRandomImage(selectedLevel);
+          currentImage = randomImage;
+          const [_, distance] = randomImage.split("_");
+          correctDistance = parseInt(distance.split(".")[0], 10);
+          imageDisplay.src = imageFolders[selectedLevel] + randomImage;
+          imageDisplay.alt = randomImage.split("_")[0];
+          resultMessage.textContent = `Podaj odległość do ${imageDisplay.alt}...`;
+        }
+      }, 2000);
+    }
+
     submitDistanceButton.addEventListener("click", () => {
       const userDistance = parseInt(distanceInput.value, 10);
       if (!isNaN(userDistance)) {
-        const result =
-          userDistance === correctDistance
-            ? "Gratulacje! Trafiłeś."
-            : `Niepoprawne. Prawidłowa odległość to ${correctDistance} metrów.`;
+        const milDot = calculateMilDot(correctDistance);
+        const result = userDistance === correctDistance
+          ? `Gratulacje! Trafiłeś. Odległość: ${correctDistance} m, Mil-dot: ${milDot}.`
+          : `Niepoprawne. Prawidłowa odległość: ${correctDistance} m, Mil-dot: ${milDot}.`;
         resultMessage.textContent = result;
         distanceInput.value = "";
+        displayNextImage();
       } else {
         resultMessage.textContent = "Wpisz prawidłową odległość.";
       }
     });
 
-    // Reset do domyślnego obrazka po odświeżeniu strony
     window.addEventListener("load", async () => {
-      await fetchImageList(); // Wczytaj listę obrazów
+      await fetchImageList();
       imageDisplay.src = "img/logo.jpg";
-      imageDisplay.alt = "Logo";
       resultMessage.textContent = "Podaj odległość...";
     });
   </script>
