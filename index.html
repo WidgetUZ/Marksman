@@ -156,15 +156,29 @@
         }, 1000);
       }
 
-      // Funkcja pobierająca listę obrazków (symulowana)
-      async function fetchImageList(folder) {
-        const images = {
-          basic: ["czolg_200.jpg", "zolnierz_300.jpg"],
-          medium: ["helikopter_500.jpg", "budynek_400.jpg"],
-          advanced: ["pojazd_600.jpg", "bunkier_700.jpg"]
-        };
-        return images[folder];
-      }
+   // Funkcja pobierająca listę obrazków z serwera
+async function fetchImageList(folder) {
+  try {
+    const response = await fetch(`/images/${folder}`);
+    if (!response.ok) throw new Error('Błąd w pobieraniu obrazków');
+    return await response.json();
+  } catch (error) {
+    console.error('Błąd:', error);
+    return [];
+  }
+}
+
+// Funkcja losująca obrazek
+async function getRandomImage(level) {
+  const images = await fetchImageList(level);
+  if (images.length === 0) {
+    console.error('Brak obrazków w folderze:', level);
+    return "img/logo.jpg"; // Domyślny obrazek w przypadku braku plików
+  }
+  const randomIndex = Math.floor(Math.random() * images.length);
+  return imageFolders[level] + images[randomIndex];
+}
+
 
       // Funkcja losująca obrazek
       async function getRandomImage(level) {
