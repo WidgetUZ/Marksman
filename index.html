@@ -1,4 +1,11 @@
-.container {
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trening Snajperski</title>
+  <style>
+    .container {
   display: flex;
   flex-wrap: nowrap; /* Zapobiega zawijaniu kolumn na komputerze */
   justify-content: center;
@@ -54,3 +61,92 @@
     order: -1; /* Przenieś kolumnę A wyżej na mobilkach */
   }
 }
+
+  </style>
+</head>
+<body>
+  <h1>MilDot Master</h1>
+  <div class="container">
+    <!-- Kolumna A -->
+    <div class="column column-a">
+      <img id="mildot-overlay" class="mildot-overlay" src="img/siatka-mildot.png" alt="Siatka Mildot">
+      <img id="image-display" src="img/logo.jpg" alt="Logo">
+    </div>
+    <!-- Kolumna B -->
+    <div class="column column-b">
+      <div class="form-group">
+        <label for="difficulty-select">Wybierz poziom trudności:</label>
+        <select id="difficulty-select">
+          <option value="" selected disabled>-- Wybierz poziom --</option>
+          <option value="basic">Podstawowy</option>
+          <option value="medium">Średni</option>
+          <option value="advanced">Zaawansowany</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="distance-input">Podaj odległość (m):</label>
+        <input type="number" id="distance-input" placeholder="Wpisz odległość">
+      </div>
+      <button id="submit-distance">Zatwierdź</button>
+      <p id="result-message">Podaj odległość...</p>
+    </div>
+  </div>
+  <script>
+    const imageDisplay = document.getElementById('image-display');
+    const mildotOverlay = document.getElementById('mildot-overlay');
+    const difficultySelect = document.getElementById('difficulty-select');
+    const distanceInput = document.getElementById('distance-input');
+    const resultMessage = document.getElementById('result-message');
+    const submitDistanceButton = document.getElementById('submit-distance');
+
+    const imageFolders = {
+      basic: "img/basic/",
+      medium: "img/medium/",
+      advanced: "img/advanced/"
+    };
+
+    let imageList = {};
+    let currentImage = "logo.jpg";
+    let correctDistance = 0;
+
+    async function fetchImageList() {
+      try {
+        const response = await fetch("image-list.json");
+        if (!response.ok) throw new Error("Błąd w pobieraniu pliku JSON");
+        imageList = await response.json();
+      } catch (error) {
+        console.error("Błąd:", error);
+      }
+    }
+
+    function getRandomImage(level) {
+      const images = imageList[level];
+      if (!images || images.length === 0) return "logo.jpg";
+      return images[Math.floor(Math.random() * images.length)];
+    }
+
+    difficultySelect.addEventListener("change", () => {
+      const level = difficultySelect.value;
+      if (level) {
+        const randomImage = getRandomImage(level);
+        currentImage = randomImage;
+        const [_, distance] = randomImage.split("_");
+        correctDistance = parseInt(distance, 10);
+        imageDisplay.src = imageFolders[level] + randomImage;
+        imageDisplay.alt = randomImage;
+        mildotOverlay.style.display = "block";
+      }
+    });
+
+    submitDistanceButton.addEventListener("click", () => {
+      const userDistance = parseInt(distanceInput.value, 10);
+      resultMessage.textContent = userDistance === correctDistance
+        ? "Gratulacje! Trafiłeś."
+        : `Niepoprawne. Prawidłowa odległość to ${correctDistance} metrów.`;
+      distanceInput.value = "";
+    });
+
+    window.addEventListener("load", fetchImageList);
+  </script>
+</body>
+</html>
