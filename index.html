@@ -13,34 +13,33 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
       overflow: hidden;
     }
     .container {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      align-items: center;
-      width: 100%;
-      max-width: 100%;
-      height: 100%;
-      box-sizing: border-box;
+      align-items: flex-start;
+      width: 95%;
+      max-width: 1200px;
+      gap: 20px;
+      padding: 20px;
     }
     .column-a, .column-b {
       border: 1px solid #ddd;
       border-radius: 10px;
       background-color: #fff;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 10px;
     }
     .column-a {
       width: 50%;
       max-width: 900px;
-      height: 100%;
-      max-height: 900px;
+      aspect-ratio: 1 / 1;
       display: flex;
       justify-content: center;
       align-items: center;
-      box-sizing: border-box;
     }
     .column-a img {
       width: 100%;
@@ -49,19 +48,20 @@
       border-radius: 10px;
     }
     .column-b {
-      width: 50%;
+      flex: 1;
       max-width: 900px;
-      padding: 20px;
-      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
-    h1, h2 {
-      font-size: 18px;
+    h1 {
+      font-size: 24px;
       margin-bottom: 10px;
     }
     select, input[type="number"], button {
       width: 100%;
       padding: 10px;
-      margin: 10px 0;
+      margin-top: 5px;
       border: 1px solid #ccc;
       border-radius: 5px;
       font-size: 16px;
@@ -74,24 +74,23 @@
     button:hover {
       background-color: #005bb5;
     }
-    #result {
-      margin-top: 10px;
+    #timer {
       font-weight: bold;
-      color: #007aff;
+      color: #e63946;
+      margin-top: 5px;
+    }
+    #result {
+      font-weight: bold;
+      margin-top: 10px;
     }
     @media (max-width: 900px) {
-      body {
-        flex-direction: column;
-        height: auto;
-      }
       .container {
         flex-direction: column;
-        height: auto;
+        align-items: center;
       }
       .column-a {
         width: 100%;
         height: auto;
-        aspect-ratio: 1 / 1;
       }
       .column-b {
         width: 100%;
@@ -103,7 +102,7 @@
   <div class="container">
     <!-- Kolumna A -->
     <div class="column-a">
-      <img id="target-image" src="img/basic/image1_200.jpg" alt="żołnierza">
+      <img id="target-image" src="img/logo.jpg" alt="logo">
     </div>
     <!-- Kolumna B -->
     <div class="column-b">
@@ -114,9 +113,10 @@
         <option value="medium">Średni</option>
         <option value="advanced">Zaawansowany</option>
       </select>
-      <h2 id="instruction">Podaj odległość do żołnierza:</h2>
+      <h2 id="instruction">Podaj odległość do obiektu:</h2>
       <input type="number" id="distance-input" placeholder="Wpisz odległość w metrach">
       <button id="submit-btn">Zatwierdź</button>
+      <p id="timer">Pozostały czas: 60 sekund</p>
       <p id="result"></p>
     </div>
   </div>
@@ -128,22 +128,40 @@
       const instruction = document.getElementById("instruction");
       const distanceInput = document.getElementById("distance-input");
       const submitBtn = document.getElementById("submit-btn");
+      const timerDisplay = document.getElementById("timer");
       const result = document.getElementById("result");
 
-      // Foldery obrazków
       const imageFolders = {
         basic: "img/basic/",
         medium: "img/medium/",
         advanced: "img/advanced/"
       };
 
-      // Funkcja pobierająca listę obrazków
+      let timer;
+      let timeRemaining = 60;
+      let correctDistance = 0;
+
+      // Funkcja ustawiająca czas w zależności od poziomu trudności
+      function setTimer(level) {
+        timeRemaining = level === "advanced" ? 30 : 60;
+        timerDisplay.textContent = `Pozostały czas: ${timeRemaining} sekund`;
+        clearInterval(timer);
+        timer = setInterval(() => {
+          timeRemaining--;
+          timerDisplay.textContent = `Pozostały czas: ${timeRemaining} sekund`;
+          if (timeRemaining <= 0) {
+            clearInterval(timer);
+            showResult();
+          }
+        }, 1000);
+      }
+
+      // Funkcja pobierająca listę obrazków (symulowana)
       async function fetchImageList(folder) {
-        // Symulowana lista obrazków dla każdego folderu
         const images = {
-          basic: ["image1_200.jpg", "image2_300.jpg"],
-          medium: ["image1_400.jpg", "image2_500.jpg"],
-          advanced: ["image1_600.jpg", "image2_700.jpg"]
+          basic: ["czolg_200.jpg", "zolnierz_300.jpg"],
+          medium: ["helikopter_500.jpg", "budynek_400.jpg"],
+          advanced: ["pojazd_600.jpg", "bunkier_700.jpg"]
         };
         return images[folder];
       }
@@ -159,33 +177,42 @@
       async function loadImage(level) {
         const imgPath = await getRandomImage(level);
         targetImage.src = imgPath;
-        const altText = imgPath.split("_")[0].split("/").pop(); // Pobiera alt z nazwy pliku
+        const filename = imgPath.split("/").pop();
+        correctDistance = parseInt(filename.split("_")[1]);
+        const altText = filename.split("_")[0];
         targetImage.alt = altText;
         instruction.textContent = `Podaj odległość do ${altText}:`;
+        setTimer(level);
       }
 
-      // Zmiana poziomu trudności
+      // Wyświetlenie wyniku
+      function showResult() {
+        const userDistance = parseInt(distanceInput.value, 10) || 0;
+        const diff = Math.abs(correctDistance - userDistance);
+        let feedback;
+        if (diff < 50) {
+          feedback = "Doskonała ocena!";
+        } else if (diff < 100) {
+          feedback = "Dobra ocena!";
+        } else {
+          feedback = "Słaba ocena, spróbuj ponownie.";
+        }
+        result.textContent = `Poprawna odległość: ${correctDistance} m. ${feedback}`;
+      }
+
+      // Obsługa zmiany poziomu trudności
       difficultySelect.addEventListener("change", () => {
         const level = difficultySelect.value;
         loadImage(level);
       });
 
-      // Obsługa przycisku zatwierdzenia
+      // Obsługa zatwierdzenia odległości
       submitBtn.addEventListener("click", () => {
-        const userDistance = parseInt(distanceInput.value, 10);
-        const correctDistance = parseInt(targetImage.src.split("_")[1]); // Pobiera wartość z nazwy pliku
-        const diff = Math.abs(correctDistance - userDistance);
-
-        if (diff < 50) {
-          result.textContent = "Doskonała ocena!";
-        } else if (diff < 100) {
-          result.textContent = "Dobra ocena!";
-        } else {
-          result.textContent = "Słaba ocena, spróbuj ponownie.";
-        }
+        clearInterval(timer);
+        showResult();
       });
 
-      // Inicjalizacja z domyślnym poziomem trudności
+      // Inicjalizacja strony
       loadImage("basic");
     });
   </script>
