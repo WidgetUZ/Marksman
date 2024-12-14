@@ -1,217 +1,233 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Symulator Odległości</title>
+  <title>Symulator oceny odległości</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      margin: 0;
+      font-family: "SF Mono", "Menlo", "Monaco", "Consolas", monospace;
+      background-color: #f9f9f9;
+      color: #333;
       display: flex;
-      flex-direction: column;
+      justify-content: center;
       align-items: center;
-      padding: 20px;
+      min-height: 100vh;
+      overflow: hidden;
     }
-
     .container {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
+      align-items: flex-start;
+      width: 95%;
+      max-width: 1200px;
       gap: 20px;
-      max-width: 100%;
+      padding: 20px;
     }
-
-    .column {
-      border: 2px solid #ccc;
+    .column-a, .column-b {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      background-color: #fff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       padding: 10px;
-      border-radius: 8px;
-      background-color: #f9f9f9;
     }
-
-    .column.a {
-      width: 900px;
-      height: 900px;
-      position: relative;
+    .column-a {
+      width: 50%;
+      max-width: 900px;
+      aspect-ratio: 1 / 1;
       display: flex;
       justify-content: center;
       align-items: center;
     }
-
-    .column.b {
+    .column-a img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+    .column-b {
       flex: 1;
       max-width: 900px;
-      min-width: 300px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
-
-    .column img {
-      max-width: 100%;
-      max-height: 100%;
-      border-radius: 5px;
+    h1 {
+      font-size: 24px;
+      margin-bottom: 10px;
     }
-
-    .form-group {
-      margin-bottom: 15px;
-    }
-
-    .form-group label {
-      font-size: 1rem;
-      font-weight: bold;
-    }
-
-    .form-group select, .form-group input {
+    select, input[type="number"], button {
       width: 100%;
       padding: 10px;
-      font-size: 1rem;
       margin-top: 5px;
       border: 1px solid #ccc;
-      border-radius: 4px;
+      border-radius: 5px;
+      font-size: 16px;
     }
-
-    .form-group button {
-      margin-top: 10px;
-      padding: 10px;
-      font-size: 1rem;
-      font-weight: bold;
-      color: white;
-      background-color: #007bff;
-      border: none;
-      border-radius: 4px;
+    button {
+      background-color: #007aff;
+      color: #fff;
       cursor: pointer;
     }
-
-    .form-group button:hover {
-      background-color: #0056b3;
+    button:hover {
+      background-color: #005bb5;
     }
-
-    .message {
-      margin-top: 10px;
-      font-size: 1.2rem;
+    #timer {
       font-weight: bold;
-      color: #333;
+      color: #e63946;
+      margin-top: 5px;
     }
-
-    @media screen and (max-width: 900px) {
+    #result {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    @media (max-width: 900px) {
       .container {
         flex-direction: column;
+        align-items: center;
       }
-
-      .column.a {
+      .column-a {
         width: 100%;
         height: auto;
       }
-
-      .column.b {
+      .column-b {
         width: 100%;
       }
     }
   </style>
 </head>
 <body>
-  <h1>Symulator Odległości</h1>
   <div class="container">
-    <!-- Kolumna A: Wyświetlanie obrazu -->
-    <div class="column a" id="image-column">
-      <img id="image-display" src="img/logo.jpg" alt="Logo">
+    <!-- Kolumna A -->
+    <div class="column-a">
+      <img id="target-image" src="img/logo.jpg" alt="logo">
     </div>
-
-    <!-- Kolumna B: Wybór poziomu trudności i wprowadzanie odległości -->
-    <div class="column b">
-      <div class="form-group">
-        <label for="difficulty-select">Wybierz poziom trudności:</label>
-        <select id="difficulty-select">
-          <option value="" disabled selected>Wybierz...</option>
-          <option value="basic">Podstawowy</option>
-          <option value="medium">Średni</option>
-          <option value="advanced">Zaawansowany</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="distance-input">Podaj odległość:</label>
-        <input type="number" id="distance-input" placeholder="Wpisz odległość w metrach">
-        <button id="submit-distance">Zatwierdź</button>
-      </div>
-      <div class="message" id="result-message">Podaj odległość...</div>
+    <!-- Kolumna B -->
+    <div class="column-b">
+      <h1>Symulator oceny odległości</h1>
+      <label for="difficulty">Wybierz poziom trudności:</label>
+      <select id="difficulty">
+        <option value="basic">Podstawowy</option>
+        <option value="medium">Średni</option>
+        <option value="advanced">Zaawansowany</option>
+      </select>
+      <h2 id="instruction">Podaj odległość do obiektu:</h2>
+      <input type="number" id="distance-input" placeholder="Wpisz odległość w metrach">
+      <button id="submit-btn">Zatwierdź</button>
+      <p id="timer">Pozostały czas: 60 sekund</p>
+      <p id="result"></p>
     </div>
   </div>
 
   <script>
-    const imageDisplay = document.getElementById('image-display');
-    const difficultySelect = document.getElementById('difficulty-select');
-    const distanceInput = document.getElementById('distance-input');
-    const resultMessage = document.getElementById('result-message');
-    const submitDistanceButton = document.getElementById('submit-distance');
+    document.addEventListener("DOMContentLoaded", () => {
+      const difficultySelect = document.getElementById("difficulty");
+      const targetImage = document.getElementById("target-image");
+      const instruction = document.getElementById("instruction");
+      const distanceInput = document.getElementById("distance-input");
+      const submitBtn = document.getElementById("submit-btn");
+      const timerDisplay = document.getElementById("timer");
+      const result = document.getElementById("result");
 
-    const imageFolders = {
-      basic: "img/basic/",
-      medium: "img/medium/",
-      advanced: "img/advanced/"
-    };
+      const imageFolders = {
+        basic: "img/basic/",
+        medium: "img/medium/",
+        advanced: "img/advanced/"
+      };
 
-    let currentImage = "logo.jpg";
-    let correctDistance = 0;
+      let timer;
+      let timeRemaining = 60;
+      let correctDistance = 0;
 
-    // Funkcja pobierająca listę obrazków z serwera
-    async function fetchImageList(folder) {
-      try {
-        const response = await fetch(`/images/${folder}`);
-        if (!response.ok) throw new Error('Błąd w pobieraniu obrazków');
-        return await response.json();
-      } catch (error) {
-        console.error('Błąd:', error);
-        return [];
+      // Funkcja ustawiająca czas w zależności od poziomu trudności
+      function setTimer(level) {
+        timeRemaining = level === "advanced" ? 30 : 60;
+        timerDisplay.textContent = `Pozostały czas: ${timeRemaining} sekund`;
+        clearInterval(timer);
+        timer = setInterval(() => {
+          timeRemaining--;
+          timerDisplay.textContent = `Pozostały czas: ${timeRemaining} sekund`;
+          if (timeRemaining <= 0) {
+            clearInterval(timer);
+            showResult();
+          }
+        }, 1000);
       }
-    }
 
-    // Funkcja losująca obrazek z danego poziomu
-    async function getRandomImage(level) {
-      const images = await fetchImageList(level);
-      if (images.length === 0) {
-        console.error('Brak obrazków w folderze:', level);
-        return "logo.jpg"; // Domyślny obrazek w przypadku braku plików
+   // Funkcja pobierająca listę obrazków z serwera
+async function fetchImageList(folder) {
+  try {
+    const response = await fetch(`/images/${folder}`);
+    if (!response.ok) throw new Error('Błąd w pobieraniu obrazków');
+    return await response.json();
+  } catch (error) {
+    console.error('Błąd:', error);
+    return [];
+  }
+}
+
+// Funkcja losująca obrazek
+async function getRandomImage(level) {
+  const images = await fetchImageList(level);
+  if (images.length === 0) {
+    console.error('Brak obrazków w folderze:', level);
+    return "img/logo.jpg"; // Domyślny obrazek w przypadku braku plików
+  }
+  const randomIndex = Math.floor(Math.random() * images.length);
+  return imageFolders[level] + images[randomIndex];
+}
+
+
+      // Funkcja losująca obrazek
+      async function getRandomImage(level) {
+        const images = await fetchImageList(level);
+        const randomIndex = Math.floor(Math.random() * images.length);
+        return imageFolders[level] + images[randomIndex];
       }
-      const randomIndex = Math.floor(Math.random() * images.length);
-      return images[randomIndex];
-    }
 
-    // Zmiana obrazka po wyborze poziomu trudności
-    difficultySelect.addEventListener('change', async () => {
-      const selectedLevel = difficultySelect.value;
-      if (selectedLevel) {
-        const randomImage = await getRandomImage(selectedLevel);
-        currentImage = randomImage;
-        const [_, distance] = randomImage.split('_'); // Pobierz odległość z nazwy pliku
-        correctDistance = parseInt(distance.split('.')[0], 10);
-        imageDisplay.src = imageFolders[selectedLevel] + randomImage;
-        imageDisplay.alt = randomImage.split('_')[0];
-        resultMessage.textContent = `Podaj odległość do ${imageDisplay.alt}...`;
+      // Wczytaj nowy obrazek
+      async function loadImage(level) {
+        const imgPath = await getRandomImage(level);
+        targetImage.src = imgPath;
+        const filename = imgPath.split("/").pop();
+        correctDistance = parseInt(filename.split("_")[1]);
+        const altText = filename.split("_")[0];
+        targetImage.alt = altText;
+        instruction.textContent = `Podaj odległość do ${altText}:`;
+        setTimer(level);
       }
-    });
 
-    // Obsługa zatwierdzania wpisanej odległości
-    submitDistanceButton.addEventListener('click', () => {
-      const userDistance = parseInt(distanceInput.value, 10);
-      if (!isNaN(userDistance)) {
-        const result = userDistance === correctDistance
-          ? "Gratulacje! Trafiłeś."
-          : `Niepoprawne. Prawidłowa odległość to ${correctDistance} metrów.`;
-        resultMessage.textContent = result;
-        distanceInput.value = "";
-      } else {
-        resultMessage.textContent = "Wpisz prawidłową odległość.";
+      // Wyświetlenie wyniku
+      function showResult() {
+        const userDistance = parseInt(distanceInput.value, 10) || 0;
+        const diff = Math.abs(correctDistance - userDistance);
+        let feedback;
+        if (diff < 50) {
+          feedback = "Doskonała ocena!";
+        } else if (diff < 100) {
+          feedback = "Dobra ocena!";
+        } else {
+          feedback = "Słaba ocena, spróbuj ponownie.";
+        }
+        result.textContent = `Poprawna odległość: ${correctDistance} m. ${feedback}`;
       }
-    });
 
-    // Reset do domyślnego obrazka po odświeżeniu strony
-    window.addEventListener('load', () => {
-      imageDisplay.src = "img/logo.jpg";
-      imageDisplay.alt = "Logo";
-      resultMessage.textContent = "Podaj odległość...";
+      // Obsługa zmiany poziomu trudności
+      difficultySelect.addEventListener("change", () => {
+        const level = difficultySelect.value;
+        loadImage(level);
+      });
+
+      // Obsługa zatwierdzenia odległości
+      submitBtn.addEventListener("click", () => {
+        clearInterval(timer);
+        showResult();
+      });
+
+      // Inicjalizacja strony
+      loadImage("basic");
     });
   </script>
 </body>
