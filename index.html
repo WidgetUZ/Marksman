@@ -166,11 +166,29 @@
         <label for="distance-input">Podaj odległość (m):</label>
         <input type="number" id="distance-input" placeholder="Wpisz odległość">
       </div>
-      <button id="submit-distance">Zatwierdź</button>
+      <button id="submit-distance">Zatwierdź</button> <button id="next-image">Następny</button>
+
       <p id="result-message">Podaj odległość...</p>
     </div>
   </div>
   <script>
+    const nextImageButton = document.getElementById('next-image');
+
+nextImageButton.addEventListener("click", () => {
+  const level = difficultySelect.value;
+  if (level) {
+    const randomImage = getRandomImage(level);
+    currentImage = randomImage;
+    const [_, distance] = randomImage.split("_");
+    correctDistance = parseInt(distance, 10);
+    imageDisplay.src = imageFolders[level] + randomImage;
+    imageDisplay.alt = randomImage;
+  } else {
+    resultMessage.textContent = "Najpierw wybierz poziom trudności.";
+  }
+});
+
+    
     const imageDisplay = document.getElementById('image-display');
     const mildotOverlay = document.getElementById('mildot-overlay');
     const difficultySelect = document.getElementById('difficulty-select');
