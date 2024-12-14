@@ -1,227 +1,56 @@
-<!DOCTYPE html>
-<html lang="pl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trening Snajperski</title>
-  <style>
-    body {
-      font-family: "SF Mono", "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;
-      margin: 0;
-      padding: 0;
-      background-color: #1e1e1e;
-      color: #d4d4d4;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-    }
+.container {
+  display: flex;
+  flex-wrap: nowrap; /* Zapobiega zawijaniu kolumn na komputerze */
+  justify-content: center;
+  align-items: flex-start;
+  gap: 20px; /* Odstęp między kolumnami */
+  max-width: 1200px;
+  width: 100%;
+}
 
-    h1 {
-      color: #61dafb;
-      margin: 20px 0;
-      font-size: 2rem;
-    }
+.column-a, .column-b {
+  flex: 1; /* Kolumny będą się skalować równomiernie */
+  max-width: 50%; /* Maksymalnie 50% szerokości kontenera */
+  min-width: 300px; /* Zapewnia minimalną szerokość */
+  box-sizing: border-box; /* Uwzględnia padding w szerokości */
+}
 
-    .container {
-      display: flex;
-      flex-wrap: wrap;
-      max-width: 1200px;
-      width: 100%;
-      gap: 20px;
-      justify-content: center;
-    }
+.column-a {
+  aspect-ratio: 1; /* Proporcje 1:1 */
+  max-height: 100%; /* Zapobiega przepełnieniu */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #2d2d2d;
+  border: 2px solid #3c3c3c;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+}
 
-    .column-a {
-      position: relative;
-      flex-shrink: 0;
-      flex-grow: 1;
-      max-width: 900px;
-      max-height: 900px;
-      width: 100%;
-      aspect-ratio: 1; /* Proporcje 1:1 */
-      background-color: #2d2d2d;
-      border: 2px solid #3c3c3c;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
-    }
+.column-a img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain; /* Zapewnia proporcjonalne skalowanie obrazu */
+}
 
-    .column-a img {
-      position: absolute;
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-    }
+.column-b {
+  padding: 20px;
+  background-color: #2d2d2d;
+  border: 2px solid #3c3c3c;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+}
 
-    .mildot-overlay {
-      display: none; /* Ukryj na początku */
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 9999; /* Priorytet */
-      pointer-events: none;
-    }
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column; /* Przełącz na układ pionowy dla mniejszych ekranów */
+  }
 
-    .column-b {
-      max-width: 900px;
-      width: 100%;
-      padding: 20px;
-      background-color: #2d2d2d;
-      border: 2px solid #3c3c3c;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
-      flex-grow: 1;
-    }
+  .column-a, .column-b {
+    max-width: 100%; /* Na małych ekranach każda kolumna zajmuje 100% szerokości */
+    flex: none; /* Wyłącz elastyczne skalowanie */
+  }
 
-    .form-group {
-      margin-bottom: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    select, input[type="number"] {
-      width: 100%;
-      padding: 10px;
-      font-size: 16px;
-      background-color: #1e1e1e;
-      border: 1px solid #3c3c3c;
-      border-radius: 5px;
-      color: #d4d4d4;
-      box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
-    }
-
-    select:focus, input[type="number"]:focus {
-      outline: none;
-      border-color: #61dafb;
-      box-shadow: 0 0 5px #61dafb;
-    }
-
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: #61dafb;
-      color: #1e1e1e;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    button:hover {
-      background-color: #42a5f5;
-    }
-
-    #result-message {
-      margin-top: 20px;
-      font-size: 16px;
-      color: #d4d4d4;
-      text-align: center;
-    }
-
-    @media (max-width: 768px) {
-      .container {
-        flex-direction: column;
-      }
-
-      .column-a {
-        order: -1; /* Kolumna A wyżej na mobilkach */
-        width: 100%;
-      }
-
-      .column-b {
-        width: 100%;
-      }
-    }
-  </style>
-</head>
-<body>
-  <h1>MilDot Master</h1>
-  <div class="container">
-    <!-- Kolumna A -->
-    <div class="column column-a">
-      <img id="mildot-overlay" class="mildot-overlay" src="img/siatka-mildot.png" alt="Siatka Mildot">
-      <img id="image-display" src="img/logo.jpg" alt="Logo">
-    </div>
-    <!-- Kolumna B -->
-    <div class="column column-b">
-      <div class="form-group">
-        <label for="difficulty-select">Wybierz poziom trudności:</label>
-        <select id="difficulty-select">
-          <option value="" selected disabled>-- Wybierz poziom --</option>
-          <option value="basic">Podstawowy</option>
-          <option value="medium">Średni</option>
-          <option value="advanced">Zaawansowany</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="distance-input">Podaj odległość (m):</label>
-        <input type="number" id="distance-input" placeholder="Wpisz odległość">
-      </div>
-      <button id="submit-distance">Zatwierdź</button>
-      <p id="result-message">Podaj odległość...</p>
-    </div>
-  </div>
-  <script>
-    const imageDisplay = document.getElementById('image-display');
-    const mildotOverlay = document.getElementById('mildot-overlay');
-    const difficultySelect = document.getElementById('difficulty-select');
-    const distanceInput = document.getElementById('distance-input');
-    const resultMessage = document.getElementById('result-message');
-    const submitDistanceButton = document.getElementById('submit-distance');
-
-    const imageFolders = {
-      basic: "img/basic/",
-      medium: "img/medium/",
-      advanced: "img/advanced/"
-    };
-
-    let imageList = {};
-    let currentImage = "logo.jpg";
-    let correctDistance = 0;
-
-    async function fetchImageList() {
-      try {
-        const response = await fetch("image-list.json");
-        if (!response.ok) throw new Error("Błąd w pobieraniu pliku JSON");
-        imageList = await response.json();
-      } catch (error) {
-        console.error("Błąd:", error);
-      }
-    }
-
-    function getRandomImage(level) {
-      const images = imageList[level];
-      if (!images || images.length === 0) return "logo.jpg";
-      return images[Math.floor(Math.random() * images.length)];
-    }
-
-    difficultySelect.addEventListener("change", () => {
-      const level = difficultySelect.value;
-      if (level) {
-        const randomImage = getRandomImage(level);
-        currentImage = randomImage;
-        const [_, distance] = randomImage.split("_");
-        correctDistance = parseInt(distance, 10);
-        imageDisplay.src = imageFolders[level] + randomImage;
-        imageDisplay.alt = randomImage;
-        mildotOverlay.style.display = "block";
-      }
-    });
-
-    submitDistanceButton.addEventListener("click", () => {
-      const userDistance = parseInt(distanceInput.value, 10);
-      resultMessage.textContent = userDistance === correctDistance
-        ? "Gratulacje! Trafiłeś."
-        : `Niepoprawne. Prawidłowa odległość to ${correctDistance} metrów.`;
-      distanceInput.value = "";
-    });
-
-    window.addEventListener("load", fetchImageList);
-  </script>
-</body>
-</html>
+  .column-a {
+    order: -1; /* Przenieś kolumnę A wyżej na mobilkach */
+  }
+}
