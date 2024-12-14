@@ -303,6 +303,28 @@ difficultySelect.addEventListener("change", () => {
   }
 });
 
+    // Funkcja sprawdzająca, czy wynik mieści się w granicy błędu
+function isWithinErrorMargin(userDistance, correctDistance, errorMargin) {
+  return (
+    userDistance >= correctDistance - errorMargin &&
+    userDistance <= correctDistance + errorMargin
+  );
+}
+
+// Obsługa przycisku "Zatwierdź"
+submitDistanceButton.addEventListener("click", () => {
+  const userDistance = parseInt(distanceInput.value, 10);
+  const errorMargin = 5; // Granica błędu wynosząca ±5 metrów
+
+  if (isWithinErrorMargin(userDistance, correctDistance, errorMargin)) {
+    resultMessage.textContent = `Gratulacje! Trafiłeś w granicach błędu. Prawidłowa odległość to ${correctDistance} metrów.`;
+  } else {
+    resultMessage.textContent = `Niepoprawne. Prawidłowa odległość to ${correctDistance} metrów.`;
+  }
+  distanceInput.value = "";
+});
+
+
   </script>
 </body>
 </html>
