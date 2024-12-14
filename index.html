@@ -159,7 +159,7 @@
    // Funkcja pobierająca listę obrazków z serwera
 async function fetchImageList(folder) {
   try {
-    const response = await fetch(`/images/${folder}`);
+    const response = await fetch(`/img/${folder}`);
     if (!response.ok) throw new Error('Błąd w pobieraniu obrazków');
     return await response.json();
   } catch (error) {
