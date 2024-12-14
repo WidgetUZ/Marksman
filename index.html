@@ -1,19 +1,13 @@
-<!DOCTYPE html>
-<html lang="pl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trening Snajperski</title>
-  <style>
- body {
+body {
   font-family: "SF Mono", "Roboto Mono", Menlo, Monaco, Consolas, "Courier New", monospace;
   margin: 0;
   padding: 0;
+  background-color: #1e1e1e;
+  color: #d4d4d4;
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: #1e1e1e;
-  color: #d4d4d4;
+  min-height: 100vh;
 }
 
 h1 {
@@ -26,25 +20,21 @@ h1 {
   display: flex;
   flex-wrap: wrap;
   max-width: 1200px;
-  margin: 20px;
+  width: 100%;
   gap: 20px;
-}
-
-.column {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  justify-content: center;
 }
 
 .column-a {
   position: relative;
+  flex-shrink: 0;
+  flex-grow: 1;
   max-width: 900px;
   max-height: 900px;
   width: 100%;
-  aspect-ratio: 1;
-  border: 2px solid #3c3c3c;
+  aspect-ratio: 1; /* Gwarantuje proporcje 1:1 */
   background-color: #2d2d2d;
+  border: 2px solid #3c3c3c;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -71,10 +61,11 @@ h1 {
   max-width: 900px;
   width: 100%;
   padding: 20px;
+  background-color: #2d2d2d;
   border: 2px solid #3c3c3c;
   border-radius: 8px;
-  background-color: #2d2d2d;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+  flex-grow: 1;
 }
 
 .form-group {
@@ -120,121 +111,20 @@ button:hover {
   margin-top: 20px;
   font-size: 16px;
   color: #d4d4d4;
+  text-align: center;
 }
 
 @media (max-width: 768px) {
   .container {
     flex-direction: column;
   }
-  .column {
-    max-width: 100%;
+  
+  .column-a {
+    order: -1; /* Kolumna A wyżej na urządzeniach mobilnych */
+    width: 100%;
+  }
+  
+  .column-b {
+    width: 100%;
   }
 }
-
-  </style>
-</head>
-<body>
-  <h1>Trening Snajperski</h1>
-  <div class="container">
-    <!-- Kolumna A -->
-    <div class="column column-a">
-      <img class="mildot-overlay" src="img/siatka-mildot.png" alt="Siatka Mildot">
-      <img id="image-display" src="img/logo.jpg" alt="Logo">
-    </div>
-    <!-- Kolumna B -->
-    <div class="column column-b">
-      <div class="form-group">
-        <label for="difficulty-select">Wybierz poziom trudności:</label>
-        <select id="difficulty-select">
-          <option value="" selected disabled>-- Wybierz poziom --</option>
-          <option value="basic">Podstawowy</option>
-          <option value="medium">Średni</option>
-          <option value="advanced">Zaawansowany</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="distance-input">Podaj odległość (m):</label>
-        <input type="number" id="distance-input" placeholder="Wpisz odległość">
-      </div>
-      <button id="submit-distance">Zatwierdź</button>
-      <p id="result-message">Podaj odległość...</p>
-    </div>
-  </div>
-  <script>
-    const imageDisplay = document.getElementById('image-display');
-    const difficultySelect = document.getElementById('difficulty-select');
-    const distanceInput = document.getElementById('distance-input');
-    const resultMessage = document.getElementById('result-message');
-    const submitDistanceButton = document.getElementById('submit-distance');
-
-    const imageFolders = {
-      basic: "img/basic/",
-      medium: "img/medium/",
-      advanced: "img/advanced/"
-    };
-
-    let currentImage = "logo.jpg";
-    let correctDistance = 0;
-    let imageList = {}; // Lista obrazków
-
-    // Funkcja pobierająca listę obrazków z pliku JSON
-    async function fetchImageList() {
-      try {
-        const response = await fetch("image-list.json");
-        if (!response.ok) throw new Error("Błąd w pobieraniu pliku JSON");
-        imageList = await response.json();
-      } catch (error) {
-        console.error("Błąd:", error);
-      }
-    }
-
-    // Funkcja losująca obrazek z danego poziomu
-    function getRandomImage(level) {
-      const images = imageList[level];
-      if (!images || images.length === 0) {
-        console.error("Brak obrazków w poziomie:", level);
-        return "logo.jpg"; // Domyślny obrazek
-      }
-      const randomIndex = Math.floor(Math.random() * images.length);
-      return images[randomIndex];
-    }
-
-    // Zmiana obrazka po wyborze poziomu trudności
-    difficultySelect.addEventListener("change", () => {
-      const selectedLevel = difficultySelect.value;
-      if (selectedLevel) {
-        const randomImage = getRandomImage(selectedLevel);
-        currentImage = randomImage;
-        const [_, distance] = randomImage.split("_"); // Wyciągnij odległość z nazwy pliku
-        correctDistance = parseInt(distance.split(".")[0], 10);
-        imageDisplay.src = imageFolders[selectedLevel] + randomImage;
-        imageDisplay.alt = randomImage.split("_")[0];
-        resultMessage.textContent = `Podaj odległość do ${imageDisplay.alt}...`;
-      }
-    });
-
-    // Obsługa zatwierdzania wpisanej odległości
-    submitDistanceButton.addEventListener("click", () => {
-      const userDistance = parseInt(distanceInput.value, 10);
-      if (!isNaN(userDistance)) {
-        const result =
-          userDistance === correctDistance
-            ? "Gratulacje! Trafiłeś."
-            : `Niepoprawne. Prawidłowa odległość to ${correctDistance} metrów.`;
-        resultMessage.textContent = result;
-        distanceInput.value = "";
-      } else {
-        resultMessage.textContent = "Wpisz prawidłową odległość.";
-      }
-    });
-
-    // Reset do domyślnego obrazka po odświeżeniu strony
-    window.addEventListener("load", async () => {
-      await fetchImageList(); // Wczytaj listę obrazów
-      imageDisplay.src = "img/logo.jpg";
-      imageDisplay.alt = "Logo";
-      resultMessage.textContent = "Podaj odległość...";
-    });
-  </script>
-</body>
-</html>
