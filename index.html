@@ -30,6 +30,8 @@
       width: 100%;
       gap: 20px;
       justify-content: center;
+      background-color: #000000;
+
     }
 
     .column-a {
@@ -127,7 +129,7 @@
       margin-top: 20px;
       font-size: 16px;
       color: #21d8c5;
-      text-align: center;
+      text-align: left;
     }
 
     @media (max-width: 768px) {
@@ -147,7 +149,7 @@
   </style>
 </head>
 <body>
-  <h1></h1>
+  <h1>Zmierz odległość do celu</h1>
   <div class="container">
     <!-- Kolumna A -->
     <div class="column column-a">
@@ -243,8 +245,8 @@ nextImageButton.addEventListener("click", () => {
     submitDistanceButton.addEventListener("click", () => {
       const userDistance = parseInt(distanceInput.value, 10);
       resultMessage.textContent = userDistance === correctDistance
-        ? "Gratulacje!."
-        : `Źle. Prawidłowa odległość to ${correctDistance} metrów.`;
+        ? "Dokładnie!"
+        : `Odległość do celu to ${correctDistance} metrów.`;
       distanceInput.value = "";
     });
 
@@ -275,7 +277,7 @@ function startCountdown(level) {
     updateCountdownDisplay();
     if (timeRemaining <= 0) {
       clearInterval(countdownInterval);
-      resultMessage.textContent = `Czas minął! Prawidłowa odległość to ${correctDistance} metrów.`;
+      resultMessage.textContent = `Czas minął! Odległość do celu to ${correctDistance} metrów.`;
     }
   }, 1000);
 }
