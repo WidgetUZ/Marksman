@@ -334,11 +334,17 @@ nextImageButton.addEventListener("click", () => {
     imageDisplay.src = imageFolders[level] + randomImage;
     imageDisplay.alt = randomImage;
     mildotOverlay.style.display = "block";
-    startCountdown(level); // Restart licznika
+
+    // Reset informacji o wyniku
+    resultMessage.textContent = "";
+
+    // Restart licznika
+    startCountdown(level);
   } else {
     resultMessage.textContent = "Najpierw wybierz poziom trudności.";
   }
 });
+
 
 
    // Funkcja sprawdzająca, czy wynik mieści się w granicy błędu
