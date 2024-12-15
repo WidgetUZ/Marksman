@@ -368,6 +368,62 @@ submitDistanceButton.addEventListener("click", () => {
   distanceInput.value = "";
 });
 
+    // Funkcja do zablokowania pola wprowadzania
+function disableDistanceInput() {
+  distanceInput.disabled = true;
+}
+
+// Funkcja do odblokowania pola wprowadzania
+function enableDistanceInput() {
+  distanceInput.disabled = false;
+}
+
+// Modyfikacja przycisku "Zatwierdź" – zablokowanie pola po kliknięciu
+submitDistanceButton.addEventListener("click", () => {
+  const userDistance = parseInt(distanceInput.value, 10);
+  const errorMargin = 10; // Granica błędu wynosząca ±10 metrów
+
+  if (isWithinErrorMargin(userDistance, correctDistance, errorMargin)) {
+    resultMessage.textContent = `Blisko! Prawidłowa odległość to ${correctDistance} metrów.`;
+  } else {
+    resultMessage.textContent = `Niepoprawne. Prawidłowa odległość to ${correctDistance} metrów.`;
+  }
+
+  // Zatrzymanie licznika po kliknięciu "Zatwierdź"
+  clearInterval(countdownInterval);
+
+  // Zablokowanie pola wprowadzania
+  disableDistanceInput();
+
+  // Wyczyszczenie pola wprowadzania
+  distanceInput.value = "";
+});
+
+// Listener przycisku "Następny" – wgranie nowego obrazka, restart licznika i odblokowanie pola
+nextImageButton.addEventListener("click", () => {
+  const level = difficultySelect.value;
+  if (level) {
+    const randomImage = getRandomImage(level);
+    currentImage = randomImage;
+    const [_, distance] = randomImage.split("_");
+    correctDistance = parseInt(distance, 10);
+    imageDisplay.src = imageFolders[level] + randomImage;
+    imageDisplay.alt = randomImage;
+    mildotOverlay.style.display = "block";
+
+    // Reset informacji o wyniku
+    resultMessage.textContent = "";
+
+    // Restart licznika
+    startCountdown(level);
+
+    // Odblokowanie pola wprowadzania
+    enableDistanceInput();
+  } else {
+    resultMessage.textContent = "Najpierw wybierz poziom trudności.";
+  }
+});
+
 
   </script>
 </body>
