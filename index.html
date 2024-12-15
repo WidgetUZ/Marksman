@@ -304,6 +304,43 @@ difficultySelect.addEventListener("change", () => {
   }
 });
 
+// Obsługa przycisku "Zatwierdź"
+submitDistanceButton.addEventListener("click", () => {
+  const userDistance = parseInt(distanceInput.value, 10);
+  const errorMargin = 5; // Granica błędu wynosząca ±5 metrów
+
+  // Sprawdzenie wyniku
+  if (isWithinErrorMargin(userDistance, correctDistance, errorMargin)) {
+    resultMessage.textContent = `Blisko! Prawidłowa odległość to ${correctDistance} metrów.`;
+  } else {
+    resultMessage.textContent = `Niepoprawne. Prawidłowa odległość to ${correctDistance} metrów.`;
+  }
+
+  // Zatrzymanie licznika po kliknięciu "Zatwierdź"
+  clearInterval(countdownInterval);
+
+  // Wyczyszczenie pola wprowadzania
+  distanceInput.value = "";
+});
+
+// Listener przycisku "Następny" – wgranie nowego obrazka i restart licznika
+nextImageButton.addEventListener("click", () => {
+  const level = difficultySelect.value;
+  if (level) {
+    const randomImage = getRandomImage(level);
+    currentImage = randomImage;
+    const [_, distance] = randomImage.split("_");
+    correctDistance = parseInt(distance, 10);
+    imageDisplay.src = imageFolders[level] + randomImage;
+    imageDisplay.alt = randomImage;
+    mildotOverlay.style.display = "block";
+    startCountdown(level); // Restart licznika
+  } else {
+    resultMessage.textContent = "Najpierw wybierz poziom trudności.";
+  }
+});
+
+
    // Funkcja sprawdzająca, czy wynik mieści się w granicy błędu
 function isWithinErrorMargin(userDistance, correctDistance, errorMargin) {
   return (
