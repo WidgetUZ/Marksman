@@ -152,121 +152,180 @@
   <h1>Zmierz odległość do celu</h1>
   <div class="container">
     <!-- Kolumna A -->
-    <div class="column column-a">
-      <img id="mildot-overlay" class="mildot-overlay" src="img/siatka-mildot.png" alt="Siatka Mildot">
-      <img id="image-display" src="img/logo.jpg" alt="Logo">
-    </div>
-    <!-- Kolumna B -->
-    <div class="column column-b">
-      <div class="form-group">
-        <label for="difficulty-select">Wybierz poziom trudności:</label>
-        <select id="difficulty-select">
-          <option value="" selected disabled>-- Wybierz poziom --</option>
-          <option value="basic">Podstawowy</option>
-          <option value="medium">Średni</option>
-          <option value="advanced">Zaawansowany</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="distance-input">Podaj odległość (m):</label>
-        <input type="number" id="distance-input" placeholder="Wpisz odległość">
-      </div>
-      <button id="submit-distance">Zatwierdź</button> <button id="next-image">Następny</button>
+   <div class="column column-a">
+  <!-- Wyświetlanie wideo -->
+  <video id="video-display" class="mildot-overlay" autoplay muted loop hidden>
+    <source id="video-source" src="" type="video/mp4">
+    Twój przeglądarka nie obsługuje elementu wideo.
+  </video>
 
-    <p id="result-message">Podaj odległość...</p>
-      <p id="countdown-timer">Pozostały czas: -- sekundy</p>
+  <!-- Siatka Mildot -->
+  <img id="mildot-overlay" class="mildot-overlay" src="img/siatka-mildot.png" alt="Siatka Mildot">
 
-    </div>
+  <!-- Obrazek -->
+  <img id="image-display" src="img/logo.jpg" alt="Logo">
+
+  <!-- Wybór poziomu trudności -->
+  <select id="difficulty-select">
+    <option value="basic">Podstawowy</option>
+    <option value="medium">Średni</option>
+    <option value="advanced">Zaawansowany</option>
+  </select>
+
+  <!-- Pole do wpisania odległości -->
+  <input id="distance-input" type="number" placeholder="Podaj odległość" />
+
+  <!-- Przycisk zatwierdzenia -->
+  <button id="submit-distance">Zatwierdź</button>
+
+  <!-- Komunikaty wyników -->
+  <p id="result-message"></p>
+  <p id="countdown-timer"></p>
+</div>
+
   </div>
 <script>
-  // Funkcja startująca odliczanie
-  function startCountdown(level) {
-    clearInterval(countdownInterval); // Resetuje wcześniejsze odliczanie
-    switch (level) {
-      case "basic":
-        timeRemaining = 120; // 2 minuty
-        break;
-      case "medium":
-        timeRemaining = 60; // 1 minuta
-        break;
-      case "advanced":
-        timeRemaining = 30; // 30 sekund
-        break;
-      default:
-        return;
-    }
+// Elementy DOM
+const difficultySelect = document.getElementById("difficulty-select");
+const imageDisplay = document.getElementById("image-display");
+const videoDisplay = document.getElementById("video-display");
+const mildotOverlay = document.getElementById("mildot-overlay");
+const submitDistanceButton = document.getElementById("submit-distance");
+const distanceInput = document.getElementById("distance-input");
+const resultMessage = document.getElementById("result-message");
+const countdownTimer = document.getElementById("countdown-timer");
 
+// Wartości ustawione na poziomach trudności
+const imageFolders = {
+  basic: "img/basic/",
+  medium: "img/medium/",
+  advanced: "img/advanced/"
+};
+
+// Listy plików do poziomów trudności
+const imageList = {
+  basic: ["target_100.jpg", "target_200.jpg"],
+  medium: ["target_300.jpg", "target_400.jpg"],
+  advanced: ["target_500.jpg", "target_600.jpg", "video1.mp4", "video2.mp4"]
+};
+
+// Zmienna do odliczania czasu
+let countdownInterval;
+let timeRemaining = 0;
+let correctDistance = 0;
+
+// Funkcja losująca obrazek
+function getRandomImage(level) {
+  const images = imageList[level].filter(file => file.endsWith(".jpg"));
+  return images[Math.floor(Math.random() * images.length)];
+}
+
+// Funkcja losująca wideo
+function getRandomVideo() {
+  const videos = imageList.advanced.filter(file => file.endsWith(".mp4"));
+  return videos[Math.floor(Math.random() * videos.length)];
+}
+
+// Funkcja do wyświetlania losowego obrazu lub wideo
+function updateAdvancedDisplay() {
+  const randomChoice = Math.random() < 0.5 ? "video" : "image"; // 50/50 szansa
+  if (randomChoice === "video") {
+    const randomVideo = getRandomVideo();
+    if (randomVideo) {
+      document.getElementById("video-source").src = imageFolders.advanced + randomVideo;
+      videoDisplay.load();
+      videoDisplay.hidden = false;
+      imageDisplay.hidden = true;
+      videoDisplay.play();
+    }
+  } else {
+    const randomImage = getRandomImage("advanced");
+    if (randomImage) {
+      imageDisplay.src = imageFolders.advanced + randomImage;
+      imageDisplay.alt = randomImage;
+      imageDisplay.hidden = false;
+      videoDisplay.hidden = true;
+      videoDisplay.pause();
+    }
+  }
+}
+
+// Funkcja zmieniająca wyświetlony obrazek lub wideo w zależności od poziomu trudności
+function updateDisplay(level) {
+  if (level === "advanced") {
+    updateAdvancedDisplay();
+  } else {
+    const randomImage = getRandomImage(level);
+    if (randomImage) {
+      imageDisplay.src = imageFolders[level] + randomImage;
+      imageDisplay.alt = randomImage;
+      imageDisplay.hidden = false;
+      videoDisplay.hidden = true;
+      videoDisplay.pause();
+    }
+  }
+}
+
+// Obsługuje zmianę poziomu trudności
+difficultySelect.addEventListener("change", () => {
+  const level = difficultySelect.value;
+  if (level) {
+    clearInterval(countdownInterval); // Reset odliczania
+    updateDisplay(level); // Wyświetl obrazek lub wideo
+    startCountdown(level); // Rozpocznij odliczanie
+  }
+});
+
+// Funkcja do uruchamiania odliczania
+function startCountdown(level) {
+  switch (level) {
+    case "basic":
+      timeRemaining = 120; // 2 minuty
+      break;
+    case "medium":
+      timeRemaining = 60; // 1 minuta
+      break;
+    case "advanced":
+      timeRemaining = 30; // 30 sekund
+      break;
+    default:
+      return;
+  }
+  updateCountdownDisplay();
+  countdownInterval = setInterval(() => {
+    timeRemaining--;
     updateCountdownDisplay();
-    countdownInterval = setInterval(() => {
-      timeRemaining--;
-      updateCountdownDisplay();
-      if (timeRemaining <= 0) {
-        clearInterval(countdownInterval);
-        resultMessage.textContent = `Czas minął! Odległość do celu to ${correctDistance} metrów.`;
-      }
-    }, 1000);
-  }
-
-  // Funkcja aktualizująca wyświetlanie pozostałego czasu
-  function updateCountdownDisplay() {
-    const countdownElement = document.getElementById("countdown-timer");
-    countdownElement.textContent = `Pozostały czas: ${timeRemaining} sekundy`;
-  }
-
-  // Listener zmiany poziomu trudności – uruchamia odliczanie i resetuje czas
-  difficultySelect.addEventListener("change", () => {
-    clearInterval(countdownInterval); // Zatrzymaj odliczanie
-    const level = difficultySelect.value;
-    if (level) {
-      const randomImage = getRandomImage(level);
-      currentImage = randomImage;
-      const [_, distance] = randomImage.split("_");
-      correctDistance = parseInt(distance, 10);
-      imageDisplay.src = imageFolders[level] + randomImage;
-      imageDisplay.alt = randomImage;
-      mildotOverlay.style.display = "block";
-      startCountdown(level); // Rozpocznij odliczanie po załadowaniu obrazka
+    if (timeRemaining <= 0) {
+      clearInterval(countdownInterval);
+      resultMessage.textContent = `Czas minął! Prawidłowa odległość to ${correctDistance} metrów.`;
+      videoDisplay.pause();
     }
-  });
+  }, 1000);
+}
 
-  // Listener zmiany obrazka – zatrzymuje odliczanie i resetuje czas
-  nextImageButton.addEventListener("click", () => {
-    clearInterval(countdownInterval); // Zatrzymaj odliczanie
-    const level = difficultySelect.value;
-    if (level) {
-      const randomImage = getRandomImage(level);
-      currentImage = randomImage;
-      const [_, distance] = randomImage.split("_");
-      correctDistance = parseInt(distance, 10);
-      imageDisplay.src = imageFolders[level] + randomImage;
-      imageDisplay.alt = randomImage;
-      startCountdown(level); // Rozpocznij odliczanie po załadowaniu obrazka
-    } else {
-      resultMessage.textContent = "Najpierw wybierz poziom trudności.";
-    }
-  });
+// Funkcja do aktualizacji wyświetlania czasu
+function updateCountdownDisplay() {
+  countdownTimer.textContent = `Pozostały czas: ${timeRemaining} sekund`;
+}
 
-  // Funkcja sprawdzająca, czy wynik mieści się w granicy błędu
-  function isWithinErrorMargin(userDistance, correctDistance, errorMargin) {
-    return (
-      userDistance >= correctDistance - errorMargin &&
-      userDistance <= correctDistance + errorMargin
-    );
+// Obsługuje przycisk zatwierdzenia
+submitDistanceButton.addEventListener("click", () => {
+  videoDisplay.pause();
+  const userDistance = parseInt(distanceInput.value, 10);
+  const errorMargin = 5; // Granica błędu wynosząca ±5 metrów
+  if (isWithinErrorMargin(userDistance, correctDistance, errorMargin)) {
+    resultMessage.textContent = `Gratulacje! Trafiłeś w granicach błędu. Prawidłowa odległość to ${correctDistance} metrów.`;
+  } else {
+    resultMessage.textContent = `Niepoprawne. Prawidłowa odległość to ${correctDistance} metrów.`;
   }
+  distanceInput.value = "";
+});
 
-  // Obsługa przycisku "Zatwierdź"
-  submitDistanceButton.addEventListener("click", () => {
-    clearInterval(countdownInterval); // Zatrzymaj odliczanie po zatwierdzeniu
-    const userDistance = parseInt(distanceInput.value, 10);
-    const errorMargin = 5; // Granica błędu wynosząca ±5 metrów
+// Funkcja sprawdzająca, czy wartość jest w granicach błędu
+function isWithinErrorMargin(value, target, margin) {
+  return Math.abs(value - target) <= margin;
+}
 
-    if (isWithinErrorMargin(userDistance, correctDistance, errorMargin)) {
-      resultMessage.textContent = `Gratulacje! Trafiłeś w granicach błędu. Prawidłowa odległość to ${correctDistance} metrów.`;
-    } else {
-      resultMessage.textContent = `Niepoprawne. Prawidłowa odległość to ${correctDistance} metrów.`;
-    }
-    distanceInput.value = "";
-  });
 </script>
 
 </body>
