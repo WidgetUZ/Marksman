@@ -367,7 +367,33 @@ submitDistanceButton.addEventListener("click", () => {
   }
   distanceInput.value = "";
 });
+    // Funkcja do dynamicznego ładowania obrazów
+    async function fetchImageList(folder) {
+        const response = await fetch(folder);
+        const text = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(text, "text/html");
+        const images = Array.from(doc.querySelectorAll("a"))
+            .map(link => link.href)
+            .filter(href => href.match(/\.(jpg|jpeg|png|gif)$/i));
 
+        return images.map(href => href.replace(location.origin, ""));
+    }
+
+    // Dynamiczne ładowanie i wyświetlanie obrazów
+    (async () => {
+        const basicImages = await fetchImageList("img/basic/");
+        const gallery = document.querySelector("#gallery"); // Przykładowy element galerii
+
+        // Tworzenie obrazów i dodawanie do galerii
+        basicImages.forEach(image => {
+            const imgElement = document.createElement("img");
+            imgElement.src = image;
+            imgElement.alt = "Dynamic Image";
+            imgElement.style.width = "200px"; // Opcjonalne style
+            gallery.appendChild(imgElement);
+        });
+    })();
 
   </script>
 </body>
