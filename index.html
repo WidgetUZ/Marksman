@@ -358,12 +358,12 @@ function isWithinErrorMargin(userDistance, correctDistance, errorMargin) {
 // Obsługa przycisku "Zatwierdź"
 submitDistanceButton.addEventListener("click", () => {
   const userDistance = parseInt(distanceInput.value, 10);
-  const errorMargin = 10; // Granica błędu wynosząca ±10 metrów
+  const errorMargin = 5; // Granica błędu wynosząca ±10 metrów
 
   if (isWithinErrorMargin(userDistance, correctDistance, errorMargin)) {
-    resultMessage.textContent = `Blisko! Prawidłowa odległość to ${correctDistance} metrów.`;
+    resultMessage.textContent = `Blisko! Odległość to ${correctDistance} m.`;
   } else {
-    resultMessage.textContent = `Niepoprawne. Prawidłowa odległość to ${correctDistance} metrów.`;
+    resultMessage.textContent = `Prawidłowa odległość to ${correctDistance} m.`;
   }
   distanceInput.value = "";
 });
@@ -381,12 +381,12 @@ function enableDistanceInput() {
 // Modyfikacja przycisku "Zatwierdź" – zablokowanie pola po kliknięciu
 submitDistanceButton.addEventListener("click", () => {
   const userDistance = parseInt(distanceInput.value, 10);
-  const errorMargin = 10; // Granica błędu wynosząca ±10 metrów
+  const errorMargin = 5; // Granica błędu wynosząca ±5 metrów
 
   if (isWithinErrorMargin(userDistance, correctDistance, errorMargin)) {
-    resultMessage.textContent = `Blisko! Prawidłowa odległość to ${correctDistance} metrów.`;
+    resultMessage.textContent = `Blisko! Odległość to ${correctDistance} m.`;
   } else {
-    resultMessage.textContent = `Niepoprawne. Prawidłowa odległość to ${correctDistance} metrów.`;
+    resultMessage.textContent = `Prawidłowa odległość to ${correctDistance} m.`;
   }
 
   // Zatrzymanie licznika po kliknięciu "Zatwierdź"
