@@ -313,7 +313,7 @@ submitDistanceButton.addEventListener("click", () => {
   if (isWithinErrorMargin(userDistance, correctDistance, errorMargin)) {
     resultMessage.textContent = `Blisko! Prawidłowa odległość to ${correctDistance} metrów.`;
   } else {
-    resultMessage.textContent = `Niepoprawne. Prawidłowa odległość to ${correctDistance} metrów.`;
+    resultMessage.textContent = `Prawidłowa odległość to ${correctDistance} metrów.`;
   }
 
   // Zatrzymanie licznika po kliknięciu "Zatwierdź"
