@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Symulator Snajperski v11.6</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            background-color: #1a202c;
+        }
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+        #scope-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #scope-view {
+            width: 95vmin;
+            height: 95vmin;
+            background-color: #111;
+            border: 10px solid black;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+        }
+        #background-area, #reticle-container, #bullet-hole-container {
+             width: 100%;
+             height: 100%;
+             position: absolute;
+             top: 0;
+             left: 0;
+        }
+        #background-area {
+             background-image: url('https://raw.githubusercontent.com/WidgetUZ/Marksman/refs/heads/main/img/tlo-strzelnica.png');
+             background-size: cover;
+             background-position: center;
+        }
+        #target-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        #target-container img {
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+        }
+        .bullet-hole, .hit-marker {
+            position: absolute;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .bullet-hole {
+            width: 14px;
+            height: 14px;
+            background-color: rgba(0, 0, 0, 0.85);
+            border: 1.5px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 6px rgba(0,0,0,0.6);
+        }
+        .bullet-hole-accurate {
+            background-color: rgba(229, 62, 62, 0.9);
+            border-color: rgba(255, 255, 255, 0.9);
+        }
+        .hit-marker {
+            width: 18px;
+            height: 18px;
+            background-color: rgba(253, 224, 71, 0.9); /* yellow-300 */
+            border: 1px solid white;
+            box-shadow: 0 0 10px rgba(253, 224, 71, 0.7);
+        }
+        @keyframes recoil {
+            0% { transform: translate(0, 0) rotate(0); }
+            20% { transform: translate(-2px, -25px) rotate(-1deg); }
+            100% { transform: translate(0, 0) rotate(0); }
+        }
+        .recoiling {
+            animation: recoil 0.3s ease-out;
+        }
+        @keyframes gong-hit-animation {
+            0% { transform: translate(-50%, -50%) scale(1) rotate(0); }
+            15% { transform: translate(-50%, -50%) scale(0.95) rotate(3deg); }
+            30% { transform: translate(-50%, -50%) scale(1) rotate(-3deg); }
+            50% { transform: translate(-50%, -50%) scale(1.02) rotate(2deg); }
+            70% { transform: translate(-50%, -50%) scale(1) rotate(-1deg); }
+            100% { transform: translate(-50%, -50%) scale(1) rotate(0); }
+        }
+        .gong-hit {
+            animation: gong-hit-animation 0.6s ease-in-out;
+        }
+        input[type="range"], input[type="number"] {
+            -webkit-appearance: none; appearance: none;
+            width: 100%;
+            background: #4a5568;
+            border-radius: 5px;
+            outline: none;
+        }
+        input[type="range"] {
+             height: 8px;
+             opacity: 0.7; transition: opacity .2s;
+        }
+        input[type="number"] {
+            padding: 4px 8px;
+            border: 1px solid #2d3748;
+            color: white;
+            -moz-appearance: textfield;
+        }
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type="range"]:hover { opacity: 1; }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 20px; height: 20px;
+            background: #e53e3e; cursor: pointer;
+            border-radius: 50%; border: 2px solid #1a202c;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+
+    <svg style="display:none;"><defs><filter id="mirage"><feTurbulence type="fractalNoise" baseFrequency="0.01 0.04" numOctaves="2" result="turbulence" seed="0"><animate attributeName="seed" from="0" to="100" dur="2s" repeatCount="indefinite" /></feTurbulence><feDisplacementMap in="SourceGraphic" in2="turbulence" scale="0" xChannelSelector="R" yChannelSelector="G" /></filter></defs></svg>
+
+    <div class="flex flex-col md:flex-row h-screen">
+        <div class="w-full md:w-2/3 h-1/2 md:h-full bg-black">
+            <div id="scope-container">
+                <div id="scope-view">
+                    <div id="background-area">
+                        <div id="target-container"></div>
+                    </div>
+                    <div id="bullet-hole-container" class="pointer-events-none"></div>
+                    <div id="reticle-container" class="pointer-events-none">
+                         <img src="https://raw.githubusercontent.com/WidgetUZ/Marksman/b261bc57f9320d48185445fc3f088464d3f222b0/siatka-mildot2.svg" alt="Siatka celownicza Mil-Dot" class="w-full h-full object-cover">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-full md:w-1/3 h-1/2 md:h-full bg-gray-800 p-4 flex flex-col justify-between overflow-y-auto">
+            <div>
+                <p class="text-xs text-gray-400 mb-2 text-center md:text-left">Broń: KBW BOR | Amunicja: .308 Lapua Scenar 180gr</p>
+                
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                    <div>
+                        <h2 class="text-md font-semibold mb-1 text-center">Tryb Gry</h2>
+                        <div class="flex space-x-2">
+                             <button id="btn-trening" class="flex-1 bg-green-600 py-2 rounded-md transition-colors text-sm">Trening</button>
+                             <button id="btn-zaawansowany" class="flex-1 bg-gray-700 hover:bg-yellow-600 py-2 rounded-md transition-colors text-sm">Zaawansowany</button>
+                        </div>
+                    </div>
+                    <div>
+                        <h2 class="text-md font-semibold mb-1 text-center">Cel</h2>
+                        <div class="flex space-x-2">
+                             <button id="btn-target-paper" class="flex-1 bg-sky-600 py-2 rounded-md transition-colors text-sm">Tarcza</button>
+                             <button id="btn-target-gong" class="flex-1 bg-gray-700 hover:bg-sky-600 py-2 rounded-md transition-colors text-sm">Gong</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="advanced-display" class="hidden grid grid-cols-2 gap-2 bg-gray-900 p-2 rounded-md mb-2 text-center">
+                    <div><span class="text-gray-400 text-xs">DYSTANS</span><p id="distance" class="font-orbitron text-lg">0 m</p></div>
+                    <div><span class="text-gray-400 text-xs">STRZAŁY</span><p id="shot-counter" class="font-orbitron text-lg">0 / 5</p></div>
+                </div>
+
+                <div id="training-controls" class="space-y-2 bg-gray-900 p-2 rounded-md mb-2">
+                    <div><label for="distance-input" class="text-xs text-gray-400">DYSTANS (m)</label><input type="number" id="distance-input" value="100" min="100" max="800" step="25" class="w-full mt-1"></div>
+                    <div><label for="wind-input" class="text-xs text-gray-400">WIATR (m/s)</label><input type="number" id="wind-input" value="0" min="0" max="10" step="0.5" class="w-full mt-1"></div>
+                </div>
+
+                 <div id="wind-display" class="bg-gray-900 p-2 rounded-md mb-2 text-center">
+                    <span class="text-gray-400 text-xs">WIATR</span>
+                    <div class="flex items-center justify-center space-x-2">
+                        <svg id="wind-arrow" class="w-5 h-5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14m-7-7l7 7-7 7"/>
+                        </svg>
+                        <p id="wind-speed" class="font-orbitron text-lg">0 m/s</p>
+                    </div>
+                </div>
+
+                <!-- Desktop Controls -->
+                <div class="hidden md:block">
+                    <div class="mb-3">
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="text-sm font-semibold">Elewacja (Góra/Dół)</label>
+                            <div class="flex items-center space-x-2">
+                                <input type="number" id="elevationInput" step="0.1" min="0" max="10" value="0.0" class="font-orbitron text-md bg-gray-900 px-2 py-1 rounded w-20 text-center">
+                                <span class="text-gray-400 text-sm">MIL</span>
+                            </div>
+                        </div>
+                        <input type="range" id="elevationSlider" min="0" max="10" value="0" step="0.1">
+                    </div>
+                    <div class="mb-3">
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="text-sm font-semibold">Kierunek (Lewo/Prawo)</label>
+                             <div class="flex items-center space-x-2">
+                                <input type="number" id="windageInput" step="0.1" min="-3" max="3" value="0.0" class="font-orbitron text-md bg-gray-900 px-2 py-1 rounded w-20 text-center">
+                                <span class="text-gray-400 text-sm">MIL</span>
+                            </div>
+                        </div>
+                        <input type="range" id="windageSlider" min="-3" max="3" value="0" step="0.1">
+                    </div>
+                </div>
+                
+                <!-- Mobile Popup Triggers -->
+                <div class="md:hidden grid grid-cols-2 gap-2 mt-2">
+                    <button id="openElevationModal" class="bg-gray-700 p-2 rounded-md text-center">
+                        <span class="text-xs text-gray-400">Elewacja</span>
+                        <p id="elevationMobileValue" class="font-orbitron">0.0 MIL</p>
+                    </button>
+                     <button id="openWindageModal" class="bg-gray-700 p-2 rounded-md text-center">
+                        <span class="text-xs text-gray-400">Kierunek</span>
+                        <p id="windageMobileValue" class="font-orbitron">0.0 MIL</p>
+                    </button>
+                </div>
+
+            </div>
+            <div class="flex flex-col space-y-2 mt-4">
+                 <button id="fireButton" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold text-xl py-3 rounded-lg shadow-lg transition-all transform hover:scale-105 disabled:bg-gray-600 disabled:cursor-not-allowed">ODDAJ STRZAŁ</button>
+                 <button id="newSeriesButton" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg py-2 rounded-lg shadow-lg transition-transform hover:scale-105">NASTĘPNA SERIA</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modals for Mobile -->
+    <div id="elevationModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4">
+        <div class="bg-gray-800 p-6 rounded-lg w-full max-w-sm">
+             <div class="flex justify-between items-center mb-4">
+                <label class="text-lg font-semibold">Elewacja (Góra/Dół)</label>
+                <button id="closeElevationModal" class="text-2xl">&times;</button>
+            </div>
+            <div class="flex items-center space-x-2 mb-4">
+                <input type="number" id="elevationInputModal" step="0.1" min="0" max="10" value="0.0" class="font-orbitron text-lg bg-gray-900 px-2 py-1 rounded w-24 text-center">
+                <span class="text-gray-400 text-lg">MIL</span>
+            </div>
+            <input type="range" id="elevationSliderModal" min="0" max="10" value="0" step="0.1">
+        </div>
+    </div>
+
+    <div id="windageModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4">
+        <div class="bg-gray-800 p-6 rounded-lg w-full max-w-sm">
+             <div class="flex justify-between items-center mb-4">
+                <label class="text-lg font-semibold">Kierunek (Lewo/Prawo)</label>
+                <button id="closeWindageModal" class="text-2xl">&times;</button>
+            </div>
+            <div class="flex items-center space-x-2 mb-4">
+                <input type="number" id="windageInputModal" step="0.1" min="-3" max="3" value="0.0" class="font-orbitron text-lg bg-gray-900 px-2 py-1 rounded w-24 text-center">
+                <span class="text-gray-400 text-lg">MIL</span>
+            </div>
+            <input type="range" id="windageSliderModal" min="-3" max="3" value="0" step="0.1">
+        </div>
+    </div>
+
+
+    <script>
+    // --- DOM Elements ---
+    const scopeView = document.getElementById('scope-view');
+    const backgroundArea = document.getElementById('background-area');
+    const targetContainer = document.getElementById('target-container');
+    const bulletHoleContainer = document.getElementById('bullet-hole-container');
+    const reticleContainer = document.getElementById('reticle-container');
+    const fireButton = document.getElementById('fireButton');
+    const newSeriesButton = document.getElementById('newSeriesButton');
+    // Desktop controls
+    const elevationSlider = document.getElementById('elevationSlider');
+    const windageSlider = document.getElementById('windageSlider');
+    const elevationInput = document.getElementById('elevationInput');
+    const windageInput = document.getElementById('windageInput');
+    // Mobile controls
+    const openElevationModal = document.getElementById('openElevationModal');
+    const openWindageModal = document.getElementById('openWindageModal');
+    const elevationModal = document.getElementById('elevationModal');
+    const windageModal = document.getElementById('windageModal');
+    const closeElevationModal = document.getElementById('closeElevationModal');
+    const closeWindageModal = document.getElementById('closeWindageModal');
+    const elevationSliderModal = document.getElementById('elevationSliderModal');
+    const windageSliderModal = document.getElementById('windageSliderModal');
+    const elevationInputModal = document.getElementById('elevationInputModal');
+    const windageInputModal = document.getElementById('windageInputModal');
+    const elevationMobileValue = document.getElementById('elevationMobileValue');
+    const windageMobileValue = document.getElementById('windageMobileValue');
+
+    const distanceDisplay = document.getElementById('distance');
+    const shotCounterDisplay = document.getElementById('shot-counter');
+    const windArrow = document.getElementById('wind-arrow');
+    const windSpeedDisplay = document.getElementById('wind-speed');
+    const mirageFilter = document.querySelector('#mirage feDisplacementMap');
+    const advancedDisplay = document.getElementById('advanced-display');
+    const trainingControls = document.getElementById('training-controls');
+    const distanceInput = document.getElementById('distance-input');
+    const windInput = document.getElementById('wind-input');
+    const btnTargetPaper = document.getElementById('btn-target-paper');
+    const btnTargetGong = document.getElementById('btn-target-gong');
+
+    // --- Global Settings ---
+    const FIXED_ZOOM = 1.5;
+
+    // --- Game State ---
+    let gameState = {
+        difficulty: 'trening',
+        currentTarget: 'paper',
+        targetWidth: 0.5,
+        targetHeight: 0.5,
+        distance: 0,
+        windSpeed: 0,
+        windAngle: 0,
+        requiredElevation: 0,
+        requiredWindage: 0,
+        shotCount: 0,
+        isRecoiling: false,
+    };
+
+    // --- Ballistics Data ---
+    const elevationBallistics = [
+        [100, 0], [125, 0.1], [150, 0.3], [175, 0.4], [200, 0.6], [225, 0.8], [300, 1.5],
+        [400, 2.6], [450, 2.9], [500, 3.9], [550, 4.6], [600, 5.4], [650, 6.3], [700, 7.2],
+        [750, 8.2], [800, 9.2]
+    ];
+    const windBallistics = [
+        [100, 0.03], [150, 0.05], [200, 0.07], [250, 0.09], [300, 0.12], [350, 0.15],
+        [400, 0.18], [450, 0.21], [500, 0.25], [550, 0.29], [600, 0.33], [650, 0.37],
+        [700, 0.42], [750, 0.47], [800, 0.52]
+    ];
+
+    // --- Utility Functions ---
+    function interpolate(data, value, index) {
+        for (let i = 0; i < data.length - 1; i++) {
+            if (value >= data[i][0] && value <= data[i + 1][0]) {
+                const [x1, y1, x2, y2] = [data[i][0], data[i][index], data[i + 1][0], data[i + 1][index]];
+                return y1 + (y2 - y1) * (value - x1) / (x2 - x1);
+            }
+        }
+        return data[data.length - 1][index];
+    }
+
+    function getBallistics(dist) {
+        return {
+            drop: interpolate(elevationBallistics, dist, 1),
+            driftPerMs: interpolate(windBallistics, dist, 1)
+        };
+    }
+
+    function getRandom(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+
+    // --- Core Game Logic ---
+    function newSeries() {
+        gameState.shotCount = 0;
+        fireButton.disabled = false;
+        bulletHoleContainer.innerHTML = '';
+        elevationSlider.value = 0;
+        windageSlider.value = 0;
+        elevationInput.value = "0.0";
+        windageInput.value = "0.0";
+        elevationSliderModal.value = 0;
+        windageSliderModal.value = 0;
+        elevationInputModal.value = "0.0";
+        windageInputModal.value = "0.0";
+
+
+        if (gameState.difficulty === 'trening') {
+            updateTrainingConditions();
+        } else {
+            gameState.distance = Math.round(getRandom(300, 800) / 10) * 10;
+            gameState.windSpeed = getRandom(0, 6);
+            gameState.windAngle = getRandom(0, 360);
+            calculateRequiredAdjustments();
+        }
+        updateUI();
+        applyScopeAdjustments();
+    }
+
+    function updateTrainingConditions() {
+        gameState.distance = parseFloat(distanceInput.value);
+        gameState.windSpeed = parseFloat(windInput.value);
+        if (gameState.shotCount === 0) {
+            gameState.windAngle = getRandom(0, 360);
+        }
+        calculateRequiredAdjustments();
+        updateUI();
+    }
+
+    function calculateRequiredAdjustments() {
+        setupDynamicTarget();
+        const b = getBallistics(gameState.distance);
+        gameState.requiredElevation = b.drop;
+        const w = Math.sin(gameState.windAngle * Math.PI / 180);
+        gameState.requiredWindage = b.driftPerMs * gameState.windSpeed * w;
+        const mI = (gameState.distance / 800) * 4;
+        backgroundArea.style.filter = `url(#mirage)`;
+        mirageFilter.setAttribute('scale', mI);
+    }
+
+    function fire() {
+        if (gameState.isRecoiling || gameState.shotCount >= 5) return;
+        gameState.shotCount++;
+        gameState.isRecoiling = true;
+        scopeView.classList.add('recoiling');
+        const pE = parseFloat(elevationSlider.value);
+        const pW = parseFloat(windageSlider.value);
+        const eE = gameState.requiredElevation - pE;
+        const wE = gameState.requiredWindage - pW;
+
+        const pixelsPerMil = scopeView.clientHeight / 20;
+        const verticalOffsetPixels = eE * pixelsPerMil;
+        const horizontalOffsetPixels = wE * pixelsPerMil;
+        
+        const verticalErrorInMeters = eE * (gameState.distance / 1000);
+        const horizontalErrorInMeters = wE * (gameState.distance / 1000);
+
+        const h = document.createElement('div');
+        
+        if (gameState.currentTarget === 'gong') {
+            const isHit = Math.abs(horizontalErrorInMeters) <= gameState.targetWidth / 2 && Math.abs(verticalErrorInMeters) <= gameState.targetHeight / 2;
+            if (isHit) {
+                h.className = 'hit-marker';
+                targetContainer.classList.add('gong-hit');
+                setTimeout(() => {
+                    h.remove();
+                    targetContainer.classList.remove('gong-hit');
+                }, 1000);
+            } else {
+                gameState.shotCount--;
+                setTimeout(() => {
+                    scopeView.classList.remove('recoiling');
+                    gameState.isRecoiling = false;
+                }, 300);
+                updateUI();
+                return;
+            }
+        } else {
+            const totalErrorInMeters = Math.sqrt(Math.pow(verticalErrorInMeters, 2) + Math.pow(horizontalErrorInMeters, 2));
+            h.className = 'bullet-hole';
+            if (totalErrorInMeters <= 0.05) {
+                h.classList.add('bullet-hole-accurate');
+            }
+        }
+        
+        h.style.left = `calc(50% - ${horizontalOffsetPixels}px)`;
+        h.style.top = `calc(50% + ${verticalOffsetPixels}px)`;
+        
+        bulletHoleContainer.appendChild(h);
+
+        if (gameState.shotCount >= 5) fireButton.disabled = true;
+        updateUI();
+        applyScopeAdjustments();
+        setTimeout(() => {
+            scopeView.classList.remove('recoiling');
+            gameState.isRecoiling = false;
+        }, 300);
+    }
+
+    // --- UI & Scope Mechanics ---
+    function updateUI() {
+        if (gameState.difficulty === 'zaawansowany') {
+            distanceDisplay.textContent = `${gameState.distance.toFixed(0)} m`;
+        }
+        shotCounterDisplay.textContent = `${gameState.shotCount} / 5`;
+        windSpeedDisplay.textContent = `${gameState.windSpeed.toFixed(1)} m/s`;
+        windArrow.style.transform = `rotate(${gameState.windAngle - 90}deg)`;
+        elevationMobileValue.textContent = `${parseFloat(elevationSlider.value).toFixed(1)} MIL`;
+        windageMobileValue.textContent = `${parseFloat(windageSlider.value).toFixed(1)} MIL`;
+    }
+
+    function applyScopeAdjustments() {
+        const zoomTransform = `scale(${FIXED_ZOOM})`;
+        const hardwareAccelHack = 'translateZ(0)';
+
+        backgroundArea.style.transform = zoomTransform;
+        reticleContainer.style.transform = `${zoomTransform} ${hardwareAccelHack}`;
+        bulletHoleContainer.style.transform = zoomTransform;
+    }
+
+    function setupDynamicTarget() {
+        const angularSize = (gameState.targetWidth / gameState.distance) * 1000;
+        const pixelsPerMil = scopeView.clientHeight / 20;
+        const targetPixelWidth = angularSize * pixelsPerMil;
+        
+        if (gameState.currentTarget === 'paper') {
+             targetContainer.innerHTML = `<img src="https://raw.githubusercontent.com/WidgetUZ/Marksman/5926ef63dae2c67f61df0075d9c178058cdc5fb5/img/Tarcza-strzelecka-tarcze-do-strzelania-cel.svg" style="width: ${targetPixelWidth}px; height: ${targetPixelWidth}px;" alt="Tarcza strzelecka">`;
+        } else {
+            const targetPixelHeight = (gameState.targetHeight / gameState.distance) * 1000 * pixelsPerMil;
+            targetContainer.innerHTML = `<div style="width: ${targetPixelWidth}px; height: ${targetPixelHeight}px; position: relative;"><svg width="100%" height="100%" viewBox="0 0 100 140" style="position: absolute; top: -20px; left: 0; overflow: visible;"><line x1="20" y1="0" x2="0" y2="20" stroke="#555" stroke-width="2" /><line x1="80" y1="0" x2="100" y2="20" stroke="#555" stroke-width="2" /></svg><img src="https://raw.githubusercontent.com/WidgetUZ/Marksman/b81db4d88d7cab56a2f2a4f6ccee37f471236a87/img/gong.svg" style="width: 100%; height: 100%;" alt="Gong"></div>`;
+        }
+    }
+
+    function switchMode(newMode) {
+        gameState.difficulty = newMode;
+        if (newMode === 'trening') {
+            document.getElementById('btn-trening').classList.replace('bg-gray-700', 'bg-green-600');
+            document.getElementById('btn-zaawansowany').classList.replace('bg-yellow-600', 'bg-gray-700');
+            advancedDisplay.classList.add('hidden');
+            trainingControls.classList.remove('hidden');
+        } else {
+            document.getElementById('btn-zaawansowany').classList.replace('bg-gray-700', 'bg-yellow-600');
+            document.getElementById('btn-trening').classList.replace('bg-green-600', 'bg-gray-700');
+            trainingControls.classList.add('hidden');
+            advancedDisplay.classList.remove('hidden');
+        }
+        newSeries();
+    }
+    
+    function switchTarget(newTarget) {
+        gameState.currentTarget = newTarget;
+        if (newTarget === 'paper') {
+            gameState.targetWidth = 0.5;
+            gameState.targetHeight = 0.5;
+            btnTargetPaper.classList.replace('bg-gray-700', 'bg-sky-600');
+            btnTargetGong.classList.replace('bg-sky-600', 'bg-gray-700');
+        } else {
+            gameState.targetWidth = 0.4;
+            gameState.targetHeight = 0.5;
+            btnTargetGong.classList.replace('bg-gray-700', 'bg-sky-600');
+            btnTargetPaper.classList.replace('bg-sky-600', 'bg-gray-700');
+        }
+        newSeries();
+    }
+
+    // --- Event Listeners ---
+    function syncElevation(value) {
+        const val = parseFloat(value).toFixed(1);
+        elevationSlider.value = val;
+        elevationInput.value = val;
+        elevationSliderModal.value = val;
+        elevationInputModal.value = val;
+        elevationMobileValue.textContent = `${val} MIL`;
+    }
+
+    function syncWindage(value) {
+        const val = parseFloat(value).toFixed(1);
+        windageSlider.value = val;
+        windageInput.value = val;
+        windageSliderModal.value = val;
+        windageInputModal.value = val;
+        windageMobileValue.textContent = `${val} MIL`;
+    }
+
+    elevationSlider.addEventListener('input', (e) => syncElevation(e.target.value));
+    elevationInput.addEventListener('input', (e) => syncElevation(e.target.value));
+    elevationSliderModal.addEventListener('input', (e) => syncElevation(e.target.value));
+    elevationInputModal.addEventListener('input', (e) => syncElevation(e.target.value));
+    
+    windageSlider.addEventListener('input', (e) => syncWindage(e.target.value));
+    windageInput.addEventListener('input', (e) => syncWindage(e.target.value));
+    windageSliderModal.addEventListener('input', (e) => syncWindage(e.target.value));
+    windageInputModal.addEventListener('input', (e) => syncWindage(e.target.value));
+    
+    openElevationModal.addEventListener('click', () => elevationModal.classList.remove('hidden'));
+    closeElevationModal.addEventListener('click', () => elevationModal.classList.add('hidden'));
+    openWindageModal.addEventListener('click', () => windageModal.classList.remove('hidden'));
+    closeWindageModal.addEventListener('click', () => windageModal.classList.add('hidden'));
+
+    document.getElementById('btn-trening').addEventListener('click', () => switchMode('trening'));
+    document.getElementById('btn-zaawansowany').addEventListener('click', () => switchMode('zaawansowany'));
+    btnTargetPaper.addEventListener('click', () => switchTarget('paper'));
+    btnTargetGong.addEventListener('click', () => switchTarget('gong'));
+    distanceInput.addEventListener('input', () => newSeries());
+    windInput.addEventListener('input', () => newSeries());
+    fireButton.addEventListener('click', fire);
+    newSeriesButton.addEventListener('click', newSeries);
+
+    // --- Initial Load ---
+    window.onload = () => {
+        switchMode('trening');
+        switchTarget('paper');
+    };
+    </script>
+</body>
+</html>
