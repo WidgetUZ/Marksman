@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Symulator Snajperski v11.8</title>
+    <title>Symulator Snajperski v11.9</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -487,14 +487,18 @@
     }
 
     function setupDynamicTarget() {
-        const angularSize = (gameState.targetWidth / gameState.distance) * 1000;
+        const referenceDistance = 100;
         const pixelsPerMil = scopeView.clientHeight / 20;
-        const targetPixelWidth = angularSize * pixelsPerMil;
+        const angularWidth = (gameState.targetWidth / referenceDistance) * 1000;
+        const targetPixelWidth = angularWidth * pixelsPerMil;
         
         if (gameState.currentTarget === 'paper') {
-             targetContainer.innerHTML = `<img src="https://raw.githubusercontent.com/WidgetUZ/Marksman/5926ef63dae2c67f61df0075d9c178058cdc5fb5/img/Tarcza-strzelecka-tarcze-do-strzelania-cel.svg" style="width: ${targetPixelWidth}px; height: ${targetPixelWidth}px;" alt="Tarcza strzelecka">`;
+             const angularHeight = (gameState.targetHeight / referenceDistance) * 1000;
+             const targetPixelHeight = angularHeight * pixelsPerMil;
+             targetContainer.innerHTML = `<img src="https://raw.githubusercontent.com/WidgetUZ/Marksman/5926ef63dae2c67f61df0075d9c178058cdc5fb5/img/Tarcza-strzelecka-tarcze-do-strzelania-cel.svg" style="width: ${targetPixelWidth}px; height: ${targetPixelHeight}px;" alt="Tarcza strzelecka">`;
         } else {
-            const targetPixelHeight = (gameState.targetHeight / gameState.distance) * 1000 * pixelsPerMil;
+            const angularHeight = (gameState.targetHeight / referenceDistance) * 1000;
+            const targetPixelHeight = angularHeight * pixelsPerMil;
             targetContainer.innerHTML = `<div style="width: ${targetPixelWidth}px; height: ${targetPixelHeight}px; position: relative;"><svg width="100%" height="100%" viewBox="0 0 100 140" style="position: absolute; top: -20px; left: 0; overflow: visible;"><line x1="20" y1="0" x2="0" y2="20" stroke="#555" stroke-width="2" /><line x1="80" y1="0" x2="100" y2="20" stroke="#555" stroke-width="2" /></svg><img src="https://raw.githubusercontent.com/WidgetUZ/Marksman/b81db4d88d7cab56a2f2a4f6ccee37f471236a87/img/gong.svg" style="width: 100%; height: 100%;" alt="Gong"></div>`;
         }
     }
