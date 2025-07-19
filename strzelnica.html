@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Symulator Snajperski v11.9</title>
+    <title>Symulator Snajperski v12.6</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -55,7 +55,7 @@
             image-rendering: -webkit-optimize-contrast;
             image-rendering: crisp-edges;
         }
-        .bullet-hole, .hit-marker {
+        .bullet-hole, .hit-marker, .test-hole {
             position: absolute;
             border-radius: 50%;
             transform: translate(-50%, -50%);
@@ -70,6 +70,13 @@
         .bullet-hole-accurate {
             background-color: rgba(229, 62, 62, 0.9);
             border-color: rgba(255, 255, 255, 0.9);
+        }
+        .test-hole {
+            width: 14px;
+            height: 14px;
+            background-color: rgba(59, 130, 246, 0.9); /* blue-500 */
+            border: 1.5px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 8px rgba(59, 130, 246, 0.7);
         }
         .hit-marker {
             width: 18px;
@@ -127,7 +134,7 @@
             border-radius: 50%; border: 2px solid #1a202c;
         }
         @media (max-width: 768px) {
-            .bullet-hole {
+            .bullet-hole, .test-hole {
                 width: 7px;
                 height: 7px;
                 border-width: 1px;
@@ -144,7 +151,7 @@
     <svg style="display:none;"><defs><filter id="mirage"><feTurbulence type="fractalNoise" baseFrequency="0.01 0.04" numOctaves="2" result="turbulence" seed="0"><animate attributeName="seed" from="0" to="100" dur="2s" repeatCount="indefinite" /></feTurbulence><feDisplacementMap in="SourceGraphic" in2="turbulence" scale="0" xChannelSelector="R" yChannelSelector="G" /></filter></defs></svg>
 
     <div class="flex flex-col md:flex-row h-screen">
-        <div class="w-full h-1/2 md:h-full md:w-auto md:aspect-square bg-black">
+        <div class="w-full h-3/5 md:h-full md:w-auto md:aspect-square bg-black">
             <div id="scope-container">
                 <div id="scope-view">
                     <div id="background-area">
@@ -158,16 +165,18 @@
             </div>
         </div>
 
-        <div class="w-full h-1/2 md:h-full md:flex-1 bg-gray-800 p-4 flex flex-col justify-between overflow-y-auto">
-            <div>
+        <div class="w-full h-2/5 md:h-full md:flex-1 bg-gray-800 p-2 md:p-6 flex flex-col justify-between overflow-y-auto">
+            <div class="flex-grow">
                 <p class="text-xs text-gray-400 mb-2 text-center md:text-left">Broń: KBW BOR | Amunicja: .308 Lapua Scenar 180gr</p>
                 
-                <div class="grid grid-cols-2 gap-2 mb-2">
+                <!-- Desktop Settings -->
+                <div class="hidden md:grid grid-cols-2 gap-2 mb-2">
                     <div>
                         <h2 class="text-md font-semibold mb-1 text-center">Tryb Gry</h2>
                         <div class="flex space-x-2">
                              <button id="btn-trening" class="flex-1 bg-green-600 py-2 rounded-md transition-colors text-sm">Trening</button>
-                             <button id="btn-zaawansowany" class="flex-1 bg-gray-700 hover:bg-yellow-600 py-2 rounded-md transition-colors text-sm">Zaawansowany</button>
+                             <button id="btn-pro" class="flex-1 bg-gray-700 hover:bg-yellow-600 py-2 rounded-md transition-colors text-sm">Pro</button>
+                             <button id="btn-test" class="flex-1 bg-gray-700 hover:bg-purple-600 py-2 rounded-md transition-colors text-sm">Test</button>
                         </div>
                     </div>
                     <div>
@@ -178,25 +187,28 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Mobile Settings Trigger -->
+                <div class="md:hidden mb-2">
+                    <button id="openSettingsModal" class="w-full bg-gray-700 py-2 rounded-md text-sm">Ustawienia</button>
+                </div>
                 
-                <div id="advanced-display" class="hidden grid grid-cols-2 gap-2 bg-gray-900 p-2 rounded-md mb-2 text-center">
-                    <div><span class="text-gray-400 text-xs">DYSTANS</span><p id="distance" class="font-orbitron text-lg">0 m</p></div>
-                    <div><span class="text-gray-400 text-xs">STRZAŁY</span><p id="shot-counter" class="font-orbitron text-lg">0 / 5</p></div>
+                <div id="info-display" class="hidden flex justify-around items-center bg-gray-900 p-2 rounded-md mb-2 text-center text-xs">
+                    <div class="flex items-baseline space-x-1"><span class="text-gray-400">DYSTANS:</span><p id="distance" class="font-orbitron text-base md:text-lg">0 m</p></div>
+                    <div class="flex items-baseline space-x-1"><span class="text-gray-400">STRZAŁY:</span><p id="shot-counter" class="font-orbitron text-lg">0 / 5</p></div>
                 </div>
 
-                <div id="training-controls" class="space-y-2 bg-gray-900 p-2 rounded-md mb-2">
-                    <div><label for="distance-input" class="text-xs text-gray-400">DYSTANS (m)</label><input type="number" id="distance-input" value="100" min="100" max="800" step="25" class="w-full mt-1"></div>
-                    <div><label for="wind-input" class="text-xs text-gray-400">WIATR (m/s)</label><input type="number" id="wind-input" value="0" min="0" max="10" step="0.5" class="w-full mt-1"></div>
+                <div id="training-controls" class="flex space-x-2 bg-gray-900 p-2 rounded-md mb-2">
+                    <div class="flex-1"><label for="distance-input" class="text-xs text-gray-400">DYSTANS (m)</label><input type="number" id="distance-input" value="100" min="100" max="800" step="25" class="w-full mt-1"></div>
+                    <div class="flex-1"><label for="wind-input" class="text-xs text-gray-400">WIATR (m/s)</label><input type="number" id="wind-input" value="0" min="0" max="10" step="0.5" class="w-full mt-1"></div>
                 </div>
 
-                 <div id="wind-display" class="bg-gray-900 p-2 rounded-md mb-2 text-center">
-                    <span class="text-gray-400 text-xs">WIATR</span>
-                    <div class="flex items-center justify-center space-x-2">
-                        <svg id="wind-arrow" class="w-5 h-5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M5 12h14m-7-7l7 7-7 7"/>
-                        </svg>
-                        <p id="wind-speed" class="font-orbitron text-lg">0 m/s</p>
-                    </div>
+                 <div id="wind-display" class="bg-gray-900 p-2 rounded-md mb-2 text-center flex items-center justify-center space-x-2">
+                    <span class="text-gray-400 text-xs">WIATR:</span>
+                    <svg id="wind-arrow" class="w-4 h-4 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14m-7-7l7 7-7 7"/>
+                    </svg>
+                    <p id="wind-speed" class="font-orbitron text-base md:text-lg">0 m/s</p>
                 </div>
 
                 <!-- Desktop Controls -->
@@ -205,11 +217,11 @@
                         <div class="flex justify-between items-center mb-1">
                             <label class="text-sm font-semibold">Elewacja (Góra/Dół)</label>
                             <div class="flex items-center space-x-2">
-                                <input type="number" id="elevationInput" step="0.1" min="0" max="10" value="0.0" class="font-orbitron text-md bg-gray-900 px-2 py-1 rounded w-20 text-center">
+                                <input type="number" id="elevationInput" step="0.1" min="-10" max="10" value="0.0" class="font-orbitron text-md bg-gray-900 px-2 py-1 rounded w-20 text-center">
                                 <span class="text-gray-400 text-sm">MIL</span>
                             </div>
                         </div>
-                        <input type="range" id="elevationSlider" min="0" max="10" value="0" step="0.1">
+                        <input type="range" id="elevationSlider" min="-10" max="10" value="0" step="0.1">
                     </div>
                     <div class="mb-3">
                         <div class="flex justify-between items-center mb-1">
@@ -224,7 +236,7 @@
                 </div>
                 
                 <!-- Mobile Popup Triggers -->
-                <div class="md:hidden grid grid-cols-2 gap-2 mt-2">
+                <div class="md:hidden grid grid-cols-2 gap-2 mt-2 mb-4">
                     <button id="openElevationModal" class="bg-gray-700 p-2 rounded-md text-center">
                         <span class="text-xs text-gray-400">Elewacja</span>
                         <p id="elevationMobileValue" class="font-orbitron">0.0 MIL</p>
@@ -236,32 +248,58 @@
                 </div>
 
             </div>
-            <div class="grid grid-cols-2 gap-2 mt-4">
-                 <button id="fireButton" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold text-lg py-3 rounded-lg shadow-lg transition-all transform hover:scale-105 disabled:bg-gray-600 disabled:cursor-not-allowed">ODDAJ STRZAŁ</button>
-                 <button id="newSeriesButton" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-base py-3 rounded-lg shadow-lg transition-transform hover:scale-105">NASTĘPNA SERIA</button>
+            <div class="mt-auto">
+                <div class="grid grid-cols-2 gap-2">
+                     <button id="fireButton" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold text-lg py-3 rounded-lg shadow-lg transition-all transform hover:scale-105 disabled:bg-gray-600 disabled:cursor-not-allowed">ODDAJ STRZAŁ</button>
+                     <button id="newSeriesButton" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-base py-3 rounded-lg shadow-lg transition-transform hover:scale-105">NASTĘPNA SERIA</button>
+                </div>
+                <p class="text-xs text-gray-500 text-center mt-2 px-2">
+                    <span class="text-red-400 font-bold">Czerwona kropka</span> oznacza trafienie w środek celu z tolerancją 1 MOA.
+                </p>
             </div>
         </div>
     </div>
     
-    <!-- Modals for Mobile -->
+    <!-- Modals -->
+    <div id="settingsModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4">
+        <div class="bg-gray-800 p-6 rounded-lg w-full max-w-sm space-y-4">
+            <div>
+                <h2 class="text-lg font-semibold mb-2 text-center">Tryb Gry</h2>
+                <div class="flex space-x-2">
+                     <button id="btn-trening-modal" class="flex-1 bg-green-600 py-2 rounded-md transition-colors text-sm">Trening</button>
+                     <button id="btn-pro-modal" class="flex-1 bg-gray-700 hover:bg-yellow-600 py-2 rounded-md transition-colors text-sm">Pro</button>
+                     <button id="btn-test-modal" class="flex-1 bg-gray-700 hover:bg-purple-600 py-2 rounded-md transition-colors text-sm">Test</button>
+                </div>
+            </div>
+            <div>
+                <h2 class="text-lg font-semibold mb-2 text-center">Cel</h2>
+                <div class="flex space-x-2">
+                     <button id="btn-target-paper-modal" class="flex-1 bg-sky-600 py-2 rounded-md transition-colors text-sm">Tarcza</button>
+                     <button id="btn-target-gong-modal" class="flex-1 bg-gray-700 hover:bg-sky-600 py-2 rounded-md transition-colors text-sm">Gong</button>
+                </div>
+            </div>
+            <button id="closeSettingsModal" class="w-full bg-gray-600 mt-4 py-2 rounded-md">Zamknij</button>
+        </div>
+    </div>
+
     <div id="elevationModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4">
         <div class="bg-gray-800 p-6 rounded-lg w-full max-w-sm">
              <div class="flex justify-between items-center mb-4">
-                <label class="text-lg font-semibold">Elewacja (Góra/Dół)</label>
+                <label class="text-lg font-semibold">Elewacja</label>
                 <button id="closeElevationModal" class="text-2xl">&times;</button>
             </div>
             <div class="flex items-center space-x-2 mb-4">
-                <input type="number" id="elevationInputModal" step="0.1" min="0" max="10" value="0.0" class="font-orbitron text-lg bg-gray-900 px-2 py-1 rounded w-24 text-center">
+                <input type="number" id="elevationInputModal" step="0.1" min="-10" max="10" value="0.0" class="font-orbitron text-lg bg-gray-900 px-2 py-1 rounded w-24 text-center">
                 <span class="text-gray-400 text-lg">MIL</span>
             </div>
-            <input type="range" id="elevationSliderModal" min="0" max="10" value="0" step="0.1">
+            <input type="range" id="elevationSliderModal" min="-10" max="10" value="0" step="0.1">
         </div>
     </div>
 
     <div id="windageModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4">
         <div class="bg-gray-800 p-6 rounded-lg w-full max-w-sm">
              <div class="flex justify-between items-center mb-4">
-                <label class="text-lg font-semibold">Kierunek (Lewo/Prawo)</label>
+                <label class="text-lg font-semibold">Kierunek</label>
                 <button id="closeWindageModal" class="text-2xl">&times;</button>
             </div>
             <div class="flex items-center space-x-2 mb-4">
@@ -269,6 +307,17 @@
                 <span class="text-gray-400 text-lg">MIL</span>
             </div>
             <input type="range" id="windageSliderModal" min="-3" max="3" value="0" step="0.1">
+        </div>
+    </div>
+    
+    <div id="test-info-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4">
+        <div class="bg-gray-800 p-6 rounded-lg w-full max-w-sm space-y-4 text-center">
+            <h2 class="text-xl font-bold font-orbitron text-purple-400">Tryb TEST</h2>
+            <p class="text-sm text-gray-300">Na tarczy widzisz <span class="text-blue-400 font-bold">niebieską</span> przestrzelinę. Jest to wynik strzału oddanego z wyzerowanymi poprawkami (0.0 MIL).</p>
+            <p class="text-sm text-gray-300">Twoim zadaniem jest obliczenie i wprowadzenie poprawnych poprawek, aby trafić w środek celu.</p>
+            <p class="text-sm text-gray-300">Trafienie w <span class="text-red-400 font-bold">czerwony</span> kolor oznacza sukces (tolerancja 1 MOA). Masz 4 próby.</p>
+            <p class="text-xs text-gray-400">(1 MOA ≈ 3cm/100m, 9cm/300m, 15cm/500m)</p>
+            <button id="closeTestInfoModal" class="w-full bg-purple-600 mt-4 py-2 rounded-md">Rozumiem</button>
         </div>
     </div>
 
@@ -287,7 +336,21 @@
     const windageSlider = document.getElementById('windageSlider');
     const elevationInput = document.getElementById('elevationInput');
     const windageInput = document.getElementById('windageInput');
+    const btnTrening = document.getElementById('btn-trening');
+    const btnPro = document.getElementById('btn-pro');
+    const btnTest = document.getElementById('btn-test');
+    const btnTargetPaper = document.getElementById('btn-target-paper');
+    const btnTargetGong = document.getElementById('btn-target-gong');
     // Mobile controls
+    const openSettingsModal = document.getElementById('openSettingsModal');
+    const settingsModal = document.getElementById('settingsModal');
+    const closeSettingsModal = document.getElementById('closeSettingsModal');
+    const btnTreningModal = document.getElementById('btn-trening-modal');
+    const btnProModal = document.getElementById('btn-pro-modal');
+    const btnTestModal = document.getElementById('btn-test-modal');
+    const btnTargetPaperModal = document.getElementById('btn-target-paper-modal');
+    const btnTargetGongModal = document.getElementById('btn-target-gong-modal');
+
     const openElevationModal = document.getElementById('openElevationModal');
     const openWindageModal = document.getElementById('openWindageModal');
     const elevationModal = document.getElementById('elevationModal');
@@ -306,12 +369,12 @@
     const windArrow = document.getElementById('wind-arrow');
     const windSpeedDisplay = document.getElementById('wind-speed');
     const mirageFilter = document.querySelector('#mirage feDisplacementMap');
-    const advancedDisplay = document.getElementById('advanced-display');
+    const infoDisplay = document.getElementById('info-display');
     const trainingControls = document.getElementById('training-controls');
     const distanceInput = document.getElementById('distance-input');
     const windInput = document.getElementById('wind-input');
-    const btnTargetPaper = document.getElementById('btn-target-paper');
-    const btnTargetGong = document.getElementById('btn-target-gong');
+    const testInfoModal = document.getElementById('test-info-modal');
+    const closeTestInfoModal = document.getElementById('closeTestInfoModal');
 
     // --- Global Settings ---
     const FIXED_ZOOM = 1.5;
@@ -375,11 +438,20 @@
 
         if (gameState.difficulty === 'trening') {
             updateTrainingConditions();
-        } else {
-            gameState.distance = Math.round(getRandom(300, 800) / 10) * 10;
+        } else if (gameState.difficulty === 'pro') {
+            const numSteps = (800 - 100) / 25;
+            const randomStep = Math.floor(Math.random() * (numSteps + 1));
+            gameState.distance = 100 + randomStep * 25;
             gameState.windSpeed = getRandom(0, 6);
             gameState.windAngle = getRandom(0, 360);
             calculateRequiredAdjustments();
+        } else { // Test mode
+            const testDistances = [100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800];
+            const randomIndex = Math.floor(Math.random() * testDistances.length);
+            gameState.distance = testDistances[randomIndex];
+            gameState.windSpeed = getRandom(0, 6);
+            gameState.windAngle = getRandom(0, 360);
+            setupTestScenario();
         }
         updateUI();
         applyScopeAdjustments();
@@ -405,12 +477,46 @@
         backgroundArea.style.filter = `url(#mirage)`;
         mirageFilter.setAttribute('scale', mI);
     }
+    
+    function setupTestScenario() {
+        setupDynamicTarget();
+        calculateRequiredAdjustments(); // Calculate the correct answer first
+
+        const errorElev = gameState.requiredElevation - 0; // Error from a 0.0 setting
+        const errorWind = gameState.requiredWindage - 0;
+
+        const pixelsPerMil = scopeView.clientHeight / 20;
+        const verticalOffsetPixels = errorElev * pixelsPerMil;
+        const horizontalOffsetPixels = errorWind * pixelsPerMil;
+
+        const h = document.createElement('div');
+        h.className = 'test-hole';
+        h.style.left = `calc(50% - ${horizontalOffsetPixels}px)`;
+        h.style.top = `calc(50% + ${verticalOffsetPixels}px)`;
+        bulletHoleContainer.appendChild(h);
+    }
+
 
     function fire() {
-        if (gameState.isRecoiling || gameState.shotCount >= 5) return;
+        if (gameState.isRecoiling || (gameState.shotCount >= 5 && gameState.difficulty !== 'test') || (gameState.shotCount >= 4 && gameState.difficulty === 'test')) return;
+        
         gameState.shotCount++;
         gameState.isRecoiling = true;
         scopeView.classList.add('recoiling');
+
+        if (gameState.difficulty === 'test') {
+            fireTestShot();
+        } else {
+            fireNormalShot();
+        }
+
+        setTimeout(() => {
+            scopeView.classList.remove('recoiling');
+            gameState.isRecoiling = false;
+        }, 300);
+    }
+
+    function fireNormalShot() {
         const pE = parseFloat(elevationSlider.value);
         const pW = parseFloat(windageSlider.value);
         const eE = gameState.requiredElevation - pE;
@@ -422,7 +528,10 @@
         
         const verticalErrorInMeters = eE * (gameState.distance / 1000);
         const horizontalErrorInMeters = wE * (gameState.distance / 1000);
-
+        const totalErrorInMeters = Math.sqrt(Math.pow(verticalErrorInMeters, 2) + Math.pow(horizontalErrorInMeters, 2));
+        
+        const toleranceInMeters = (gameState.distance / 100) * 0.03; // 1 MOA = 3cm @ 100m
+        
         const h = document.createElement('div');
         
         if (gameState.currentTarget === 'gong') {
@@ -436,17 +545,12 @@
                 }, 1000);
             } else {
                 gameState.shotCount--;
-                setTimeout(() => {
-                    scopeView.classList.remove('recoiling');
-                    gameState.isRecoiling = false;
-                }, 300);
                 updateUI();
                 return;
             }
         } else {
-            const totalErrorInMeters = Math.sqrt(Math.pow(verticalErrorInMeters, 2) + Math.pow(horizontalErrorInMeters, 2));
             h.className = 'bullet-hole';
-            if (totalErrorInMeters <= 0.05) {
+            if (totalErrorInMeters <= toleranceInMeters) {
                 h.classList.add('bullet-hole-accurate');
             }
         }
@@ -458,19 +562,51 @@
 
         if (gameState.shotCount >= 5) fireButton.disabled = true;
         updateUI();
-        applyScopeAdjustments();
-        setTimeout(() => {
-            scopeView.classList.remove('recoiling');
-            gameState.isRecoiling = false;
-        }, 300);
     }
+    
+    function fireTestShot() {
+        const pE = parseFloat(elevationSlider.value);
+        const pW = parseFloat(windageSlider.value);
+
+        const errorElev = gameState.requiredElevation - pE;
+        const errorWind = gameState.requiredWindage - pW;
+        
+        const verticalErrorInMeters = errorElev * (gameState.distance / 1000);
+        const horizontalErrorInMeters = errorWind * (gameState.distance / 1000);
+        const totalErrorInMeters = Math.sqrt(Math.pow(verticalErrorInMeters, 2) + Math.pow(horizontalErrorInMeters, 2));
+
+        const toleranceInMeters = (gameState.distance / 100) * 0.03; // 1 MOA = 3cm @ 100m
+        const isCorrect = totalErrorInMeters <= toleranceInMeters;
+
+        const pixelsPerMil = scopeView.clientHeight / 20;
+        const verticalOffsetPixels = errorElev * pixelsPerMil;
+        const horizontalOffsetPixels = errorWind * pixelsPerMil;
+
+        const h = document.createElement('div');
+        h.className = 'bullet-hole';
+        if (isCorrect) {
+            h.classList.add('bullet-hole-accurate');
+            fireButton.disabled = true;
+        }
+
+        h.style.left = `calc(50% - ${horizontalOffsetPixels}px)`;
+        h.style.top = `calc(50% + ${verticalOffsetPixels}px)`;
+        bulletHoleContainer.appendChild(h);
+
+        if (gameState.shotCount >= 4) fireButton.disabled = true;
+        updateUI();
+    }
+
 
     // --- UI & Scope Mechanics ---
     function updateUI() {
-        if (gameState.difficulty === 'zaawansowany') {
+        if (gameState.difficulty === 'pro' || gameState.difficulty === 'test') {
             distanceDisplay.textContent = `${gameState.distance.toFixed(0)} m`;
         }
-        shotCounterDisplay.textContent = `${gameState.shotCount} / 5`;
+        
+        const maxShots = gameState.difficulty === 'test' ? 4 : 5;
+        shotCounterDisplay.textContent = `${gameState.shotCount} / ${maxShots}`;
+        
         windSpeedDisplay.textContent = `${gameState.windSpeed.toFixed(1)} m/s`;
         windArrow.style.transform = `rotate(${gameState.windAngle - 90}deg)`;
         elevationMobileValue.textContent = `${parseFloat(elevationSlider.value).toFixed(1)} MIL`;
@@ -505,16 +641,28 @@
 
     function switchMode(newMode) {
         gameState.difficulty = newMode;
+        const allButtons = [btnTrening, btnPro, btnTest, btnTreningModal, btnProModal, btnTestModal];
+        allButtons.forEach(btn => {
+            btn.classList.remove('bg-green-600', 'bg-yellow-600', 'bg-purple-600');
+            btn.classList.add('bg-gray-700');
+        });
+        
         if (newMode === 'trening') {
-            document.getElementById('btn-trening').classList.replace('bg-gray-700', 'bg-green-600');
-            document.getElementById('btn-zaawansowany').classList.replace('bg-yellow-600', 'bg-gray-700');
-            advancedDisplay.classList.add('hidden');
+            btnTrening.classList.replace('bg-gray-700', 'bg-green-600');
+            btnTreningModal.classList.replace('bg-gray-700', 'bg-green-600');
+            infoDisplay.classList.add('hidden');
             trainingControls.classList.remove('hidden');
-        } else {
-            document.getElementById('btn-zaawansowany').classList.replace('bg-gray-700', 'bg-yellow-600');
-            document.getElementById('btn-trening').classList.replace('bg-green-600', 'bg-gray-700');
+        } else { // pro or test
             trainingControls.classList.add('hidden');
-            advancedDisplay.classList.remove('hidden');
+            infoDisplay.classList.remove('hidden');
+            if (newMode === 'pro') {
+                btnPro.classList.replace('bg-gray-700', 'bg-yellow-600');
+                btnProModal.classList.replace('bg-gray-700', 'bg-yellow-600');
+            } else {
+                btnTest.classList.replace('bg-gray-700', 'bg-purple-600');
+                btnTestModal.classList.replace('bg-gray-700', 'bg-purple-600');
+                testInfoModal.classList.remove('hidden');
+            }
         }
         newSeries();
     }
@@ -524,13 +672,21 @@
         if (newTarget === 'paper') {
             gameState.targetWidth = 0.5;
             gameState.targetHeight = 0.5;
-            btnTargetPaper.classList.replace('bg-gray-700', 'bg-sky-600');
-            btnTargetGong.classList.replace('bg-sky-600', 'bg-gray-700');
+            [btnTargetPaper, btnTargetPaperModal].forEach(btn => {
+                btn.classList.replace('bg-gray-700', 'bg-sky-600');
+            });
+            [btnTargetGong, btnTargetGongModal].forEach(btn => {
+                btn.classList.replace('bg-sky-600', 'bg-gray-700');
+            });
         } else {
             gameState.targetWidth = 0.4;
             gameState.targetHeight = 0.5;
-            btnTargetGong.classList.replace('bg-gray-700', 'bg-sky-600');
-            btnTargetPaper.classList.replace('bg-sky-600', 'bg-gray-700');
+            [btnTargetGong, btnTargetGongModal].forEach(btn => {
+                btn.classList.replace('bg-gray-700', 'bg-sky-600');
+            });
+            [btnTargetPaper, btnTargetPaperModal].forEach(btn => {
+                btn.classList.replace('bg-sky-600', 'bg-gray-700');
+            });
         }
         newSeries();
     }
@@ -569,10 +725,23 @@
     openWindageModal.addEventListener('click', () => windageModal.classList.remove('hidden'));
     closeWindageModal.addEventListener('click', () => windageModal.classList.add('hidden'));
 
-    document.getElementById('btn-trening').addEventListener('click', () => switchMode('trening'));
-    document.getElementById('btn-zaawansowany').addEventListener('click', () => switchMode('zaawansowany'));
+    // Desktop buttons
+    btnTrening.addEventListener('click', () => switchMode('trening'));
+    btnPro.addEventListener('click', () => switchMode('pro'));
+    btnTest.addEventListener('click', () => switchMode('test'));
     btnTargetPaper.addEventListener('click', () => switchTarget('paper'));
     btnTargetGong.addEventListener('click', () => switchTarget('gong'));
+    
+    // Mobile modal buttons
+    openSettingsModal.addEventListener('click', () => settingsModal.classList.remove('hidden'));
+    closeSettingsModal.addEventListener('click', () => settingsModal.classList.add('hidden'));
+    btnTreningModal.addEventListener('click', () => { switchMode('trening'); settingsModal.classList.add('hidden'); });
+    btnProModal.addEventListener('click', () => { switchMode('pro'); settingsModal.classList.add('hidden'); });
+    btnTestModal.addEventListener('click', () => { switchMode('test'); settingsModal.classList.add('hidden'); });
+    btnTargetPaperModal.addEventListener('click', () => { switchTarget('paper'); settingsModal.classList.add('hidden'); });
+    btnTargetGongModal.addEventListener('click', () => { switchTarget('gong'); settingsModal.classList.add('hidden'); });
+    closeTestInfoModal.addEventListener('click', () => testInfoModal.classList.add('hidden'));
+
     distanceInput.addEventListener('input', () => newSeries());
     windInput.addEventListener('input', () => newSeries());
     fireButton.addEventListener('click', fire);
